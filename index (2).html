@@ -1,0 +1,3705 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ma Décharge Mentale">
+<meta name="theme-color" content="#2D2420">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232D2420'/><text y='.9em' font-size='80' x='10'>🧠</text></svg>">
+<link rel="manifest" href="manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ma Décharge Mentale</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF7F2;
+    --warm: #F2EBE0;
+    --blush: #E8C4B0;
+    --rose: #C4715A;
+    --deep: #2D2420;
+    --muted: #8C7B74;
+    --sage: #7A9E8E;
+    --sage-light: #B8D4CA;
+    --urgent: #D4573A;
+    --card: #FFFFFF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--deep);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SPLASH / HOME */
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── ACCUEIL ── */
+  #screen-home {
+    background: var(--deep);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #screen-home::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,113,90,0.25) 0%, transparent 70%);
+    top: -100px; right: -150px;
+    animation: pulse 6s ease-in-out infinite;
+  }
+  #screen-home::after {
+    content: '';
+    position: absolute;
+    width: 350px; height: 350px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(122,158,142,0.2) 0%, transparent 70%);
+    bottom: -80px; left: -100px;
+    animation: pulse 8s ease-in-out infinite reverse;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+  }
+
+  .home-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.1;
+    margin-bottom: 8px;
+    position: relative; z-index: 1;
+    animation: fadeUp 0.8s ease forwards;
+  }
+  .home-logo span { color: var(--blush); font-style: italic; }
+
+  .home-tagline {
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    margin-bottom: 60px;
+    position: relative; z-index: 1;
+    animation: fadeUp 0.8s 0.15s ease both;
+  }
+
+  .home-couples {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 48px;
+    position: relative; z-index: 1;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .couple-btn {
+    flex: 1;
+    padding: 20px 16px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+  }
+  .couple-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--blush); transform: translateY(-2px); }
+  .couple-btn .emoji { font-size: 32px; margin-bottom: 8px; }
+  .couple-btn .label { color: var(--cream); font-size: 13px; font-weight: 500; }
+  .couple-btn .sub { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  .btn-primary {
+    background: var(--rose);
+    color: white;
+    border: none;
+    padding: 18px 48px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative; z-index: 1;
+    animation: fadeUp 0.8s 0.45s ease both;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary:hover { background: #b5614b; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(196,113,90,0.4); }
+
+  /* ── ONBOARDING STEPS ── */
+  .onboarding-step { display: none; flex-direction: column; align-items: center; width: 100%; position: relative; z-index: 1; }
+  .onboarding-step.active-step { display: flex; }
+
+  .onboarding-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 24px 20px;
+    width: 100%;
+    margin: 24px 0;
+    animation: fadeUp 0.5s ease both;
+  }
+  .step-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 20px; text-align: center; }
+
+  .profile-row { display: flex; align-items: flex-start; gap: 12px; }
+  .profile-block { flex: 1; }
+  .avatar-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 500; text-align: center; }
+
+  .avatar-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .avatar-option {
+    font-size: 22px; text-align: center; padding: 6px 4px; border-radius: 10px;
+    cursor: pointer; border: 2px solid transparent; transition: all 0.2s;
+    background: rgba(255,255,255,0.05);
+  }
+  .avatar-option:hover { background: rgba(255,255,255,0.12); }
+  .avatar-option.selected { border-color: var(--blush); background: rgba(232,196,176,0.15); }
+
+  .profile-divider { font-size: 20px; margin-top: 36px; flex-shrink: 0; }
+
+  .who-manages { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; margin: 24px 0; animation: fadeUp 0.5s 0.1s ease both; }
+  .manage-btn {
+    background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 20px 12px; text-align: center; cursor: pointer; transition: all 0.25s;
+  }
+  .manage-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--blush); transform: translateY(-2px); }
+  .manage-btn.selected { border-color: var(--blush); background: rgba(232,196,176,0.12); }
+  .manage-emoji { font-size: 30px; margin-bottom: 8px; }
+  .manage-label { color: var(--cream); font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .manage-sub { color: var(--muted); font-size: 11px; }
+
+  .btn-back { background: transparent; border: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; margin-top: 12px; position: relative; z-index: 1; }
+  .btn-back:hover { color: var(--cream); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── DASHBOARD ── */
+  #screen-dashboard {
+    background: var(--cream);
+    flex-direction: column;
+  }
+
+  .top-bar {
+    padding: 52px 24px 20px;
+    background: var(--deep);
+    position: relative;
+    overflow: hidden;
+  }
+  .top-bar::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 0; right: 0;
+    height: 60px;
+    background: var(--cream);
+    border-radius: 30px 30px 0 0;
+  }
+
+  .top-greeting {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--cream);
+    margin-bottom: 4px;
+  }
+  .top-greeting span { color: var(--blush); font-style: italic; }
+
+  .top-sub { font-size: 13px; color: var(--muted); font-weight: 300; }
+
+  .score-bar {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  .score-pill {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .score-pill .name { color: var(--muted); font-size: 12px; }
+  .score-pill .val { color: var(--cream); font-size: 16px; font-weight: 500; }
+  .score-pill .emoji { font-size: 18px; }
+
+  .balance-indicator {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .balance-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .balance-fill {
+    height: 100%;
+    width: 68%;
+    background: linear-gradient(90deg, var(--sage), var(--blush));
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+  .balance-label { font-size: 11px; color: var(--muted); }
+
+  .dashboard-body {
+    flex: 1;
+    padding: 8px 20px 100px;
+    overflow-y: auto;
+  }
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 24px 0 12px;
+  }
+
+  /* Grille catégories */
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .cat-card {
+    background: white;
+    border-radius: 20px;
+    padding: 18px 16px;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 2px 12px rgba(45,36,32,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .cat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(45,36,32,0.1); }
+  .cat-card.has-urgent::after {
+    content: '';
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--urgent);
+    box-shadow: 0 0 0 2px rgba(212,87,58,0.2);
+    animation: blink 2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .cat-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .cat-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--deep);
+    margin-bottom: 4px;
+  }
+  .cat-count {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .cat-accent {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    opacity: 0.08;
+    transform: translate(20px, 20px);
+  }
+
+  /* Tâches urgentes */
+  .urgent-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .task-card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(45,36,32,0.05);
+    cursor: pointer;
+    transition: all 0.2s;
+    animation: fadeUp 0.4s ease both;
+  }
+  .task-card:hover { transform: translateX(4px); }
+
+  .task-cat-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .task-info { flex: 1; }
+  .task-title { font-size: 14px; font-weight: 500; color: var(--deep); }
+  .task-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .task-assignee {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .task-assignee.moi { background: #EEF6F3; color: var(--sage); }
+  .task-assignee.lui { background: #FFF0EB; color: var(--rose); }
+  .task-assignee.deux { background: #F5F0FF; color: #8B6FB5; }
+
+  .urgency-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .urgency-dot.high { background: var(--urgent); }
+  .urgency-dot.medium { background: #E8A84A; }
+  .urgency-dot.low { background: var(--sage); }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 1px solid rgba(45,36,32,0.06);
+    display: flex;
+    padding: 10px 0 env(safe-area-inset-bottom, 16px);
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 6px 2px;
+    min-width: 0;
+  }
+  .nav-item .nav-icon { font-size: 20px; line-height: 1; }
+  .nav-item .nav-label { font-size: 9px; color: var(--muted); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
+  .nav-item.active .nav-label { color: var(--rose); }
+  .nav-item.active .nav-icon { filter: none; }
+
+  .fab {
+    position: fixed;
+    bottom: 75px; right: 20px;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--rose);
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(196,113,90,0.5);
+    transition: all 0.3s;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 99;
+  }
+  .fab:hover { transform: scale(1.1) rotate(45deg); }
+
+  /* ── MODAL NOUVELLE TÂCHE ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(45,36,32,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-sheet {
+    background: var(--cream);
+    border-radius: 28px 28px 0 0;
+    padding: 28px 24px 48px;
+    width: 100%;
+    animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--blush);
+    border-radius: 2px;
+    margin: 0 auto 24px;
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--deep);
+    margin-bottom: 24px;
+  }
+
+  .form-group { margin-bottom: 18px; }
+  .form-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; margin-bottom: 8px; display: block; }
+
+  .form-input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(45,36,32,0.1);
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--deep);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--rose); }
+
+  .chips-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(45,36,32,0.12);
+    background: white;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--deep);
+  }
+  .chip:hover { border-color: var(--rose); }
+  .chip.selected { background: var(--rose); color: white; border-color: var(--rose); }
+  .chip.selected.sage { background: var(--sage); border-color: var(--sage); }
+  .chip.selected.purple { background: #8B6FB5; border-color: #8B6FB5; }
+
+  .recurrence-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .btn-submit {
+    width: 100%;
+    padding: 18px;
+    border-radius: 16px;
+    background: var(--deep);
+    color: var(--cream);
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-submit:hover { background: var(--rose); }
+
+  /* ── MODAL MULTI-ÉTAPES ── */
+  .modal-step { display: none; }
+  .modal-step.active-modal-step { display: block; animation: fadeUp 0.3s ease both; }
+  .modal-step-indicator { display: flex; gap: 6px; justify-content: center; margin-bottom: 20px; }
+  .mstep-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(45,36,32,0.12); transition: all 0.3s; }
+  .mstep-dot.active { background: var(--rose); width: 20px; border-radius: 4px; }
+  .mstep-dot.done { background: var(--sage); }
+  .modal-cat-badge { display: inline-block; background: var(--warm); color: var(--muted); font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 20px; margin-bottom: 12px; }
+
+  .cat-grid-modal { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .cat-modal-btn { background: var(--warm); border-radius: 16px; padding: 14px 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+  .cat-modal-btn:hover { border-color: var(--rose); background: white; }
+  .cat-modal-btn.selected { border-color: var(--rose); background: white; box-shadow: 0 4px 12px rgba(196,113,90,0.15); }
+  .cat-modal-btn.full-width { grid-column: span 2; flex-direction: row; justify-content: center; gap: 10px; }
+  .cat-modal-icon { font-size: 26px; }
+  .cat-modal-name { font-size: 12px; font-weight: 500; color: var(--deep); text-align: center; }
+
+  .who-grid { display: flex; gap: 10px; }
+  .who-btn { flex: 1; background: var(--warm); border-radius: 14px; padding: 14px 8px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+  .who-btn:hover { border-color: var(--rose); }
+  .who-btn.selected { border-color: var(--rose); background: white; box-shadow: 0 4px 12px rgba(196,113,90,0.12); }
+  .who-avatar { font-size: 28px; margin-bottom: 4px; }
+  .who-name { font-size: 12px; font-weight: 500; color: var(--deep); }
+
+  .urgency-grid { display: flex; flex-direction: column; gap: 8px; }
+  .urgency-btn { display: flex; align-items: center; gap: 12px; background: var(--warm); border-radius: 14px; padding: 12px 14px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+  .urgency-btn:hover { border-color: var(--rose); }
+  .urgency-btn.selected { background: white; box-shadow: 0 4px 12px rgba(45,36,32,0.08); }
+  .urgency-btn.selected.urgent { border-color: var(--urgent); }
+  .urgency-btn.selected.normal { border-color: #E8A84A; }
+  .urgency-btn.selected.low { border-color: var(--sage); }
+  .urg-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .urg-label { font-size: 14px; font-weight: 500; color: var(--deep); }
+  .urg-sub { font-size: 11px; color: var(--muted); }
+
+  .recur-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .recur-btn { background: var(--warm); border-radius: 14px; padding: 12px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+  .recur-btn:hover { border-color: var(--rose); }
+  .recur-btn.selected { border-color: var(--rose); background: white; }
+  .recur-icon { font-size: 20px; margin-bottom: 4px; }
+  .recur-label { font-size: 12px; font-weight: 500; color: var(--deep); }
+
+  .task-summary { background: var(--warm); border-radius: 14px; padding: 14px; margin: 16px 0 0; }
+  .summary-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(45,36,32,0.06); }
+  .summary-row:last-child { border-bottom: none; }
+  .sum-label { font-size: 12px; color: var(--muted); }
+  .sum-val { font-size: 12px; font-weight: 500; color: var(--deep); text-align: right; max-width: 60%; }
+
+  .modal-nav-row { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
+  .btn-back-modal { background: var(--warm); border: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 12px 16px; border-radius: 12px; cursor: pointer; }
+  .btn-next-modal { flex: 1; background: var(--deep); color: var(--cream); border: none; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; padding: 14px; border-radius: 14px; cursor: pointer; transition: background 0.2s; }
+  .btn-next-modal:hover { background: var(--rose); }
+
+  /* Magasins par liste */
+  .magasins-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .add-liste-btn { background: var(--rose); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .add-liste-btn:hover { background: var(--deep); }
+
+  .magasins-list { display: flex; flex-direction: column; gap: 10px; }
+  .magasin-card { background: white; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(45,36,32,0.05); cursor: pointer; transition: all 0.2s; overflow: hidden; }
+  .magasin-card:hover { transform: translateX(4px); box-shadow: 0 4px 16px rgba(45,36,32,0.1); }
+  .magasin-color { width: 4px; height: 40px; border-radius: 2px; flex-shrink: 0; }
+  .magasin-emoji { font-size: 22px; }
+  .magasin-info { flex: 1; }
+  .magasin-name { font-size: 15px; font-weight: 600; color: var(--deep); }
+  .magasin-count { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .magasin-arrow { font-size: 22px; color: var(--muted); }
+
+  .magasin-detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .magasin-detail-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--deep); }
+
+  /* Modal nouvelle liste */
+  .nouvelle-liste-modal { position: fixed; inset: 0; background: rgba(45,36,32,0.5); backdrop-filter: blur(4px); z-index: 400; display: none; align-items: flex-end; }
+  .nouvelle-liste-modal.open { display: flex; }
+  .nouvelle-liste-sheet { background: var(--cream); border-radius: 28px 28px 0 0; padding: 28px 24px 48px; width: 100%; animation: slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+  .emoji-picker-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .emoji-pick { width: 42px; height: 42px; border-radius: 12px; background: var(--warm); border: 2px solid transparent; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+  .emoji-pick:hover { border-color: var(--rose); }
+  .emoji-pick.selected { border-color: var(--rose); background: white; }
+
+  /* ── COUPLE ── */
+  .couple-profils { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .profil-card { flex: 1; background: white; border-radius: 20px; padding: 20px 14px; text-align: center; box-shadow: 0 2px 12px rgba(45,36,32,0.06); }
+  .moi-card { border-top: 3px solid var(--rose); }
+  .lui-card { border-top: 3px solid var(--sage); }
+  .profil-avatar { font-size: 36px; margin-bottom: 6px; }
+  .profil-name { font-size: 16px; font-weight: 700; color: var(--deep); margin-bottom: 2px; }
+  .profil-role { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .profil-stats { font-size: 11px; color: var(--muted); background: var(--warm); border-radius: 8px; padding: 4px 8px; }
+  .profil-coeur { font-size: 24px; flex-shrink: 0; }
+
+  .invite-card { background: white; border-radius: 16px; padding: 16px; display: flex; gap: 14px; align-items: center; box-shadow: 0 2px 8px rgba(45,36,32,0.05); margin-bottom: 12px; }
+  .invite-icon { font-size: 32px; flex-shrink: 0; }
+  .invite-title { font-size: 14px; font-weight: 600; color: var(--deep); margin-bottom: 3px; }
+  .invite-sub { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+  .invite-actions { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .invite-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 14px; border: none; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .invite-btn:hover { transform: translateY(-2px); }
+  .invite-btn.whatsapp { background: #25D366; color: white; }
+  .invite-btn.sms { background: var(--deep); color: var(--cream); }
+  .invite-btn.copy { background: var(--warm); color: var(--deep); }
+
+  .code-invite { background: linear-gradient(135deg, var(--deep), #5A3A34); border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 4px; }
+  .code-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .code-value { font-size: 32px; font-weight: 700; color: var(--cream); letter-spacing: 0.1em; font-family: monospace; margin-bottom: 6px; }
+  .code-sub { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+  .abonnement-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 12px rgba(45,36,32,0.06); border: 1.5px solid var(--blush); }
+  .abo-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .abo-plan { font-size: 16px; font-weight: 700; color: var(--deep); }
+  .abo-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .abo-badge { background: var(--blush); color: var(--rose); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+  .abo-features { display: flex; flex-direction: column; gap: 6px; }
+  .abo-feat { font-size: 13px; padding: 6px 0; }
+  .abo-feat.included { color: var(--deep); }
+  .abo-feat.locked { color: var(--muted); }
+  .courses-tabs { display: flex; gap: 8px; margin-bottom: 16px; background: var(--warm); border-radius: 14px; padding: 4px; }
+  .ctab { flex: 1; text-align: center; padding: 10px 6px; font-size: 12px; font-weight: 500; color: var(--muted); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+  .ctab.active { background: white; color: var(--deep); box-shadow: 0 2px 8px rgba(45,36,32,0.08); }
+  .ctab-content { display: none; }
+  .ctab-content.active-tab { display: block; animation: fadeUp 0.3s ease both; }
+
+  .courses-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .course-item { background: white; border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(45,36,32,0.05); cursor: pointer; transition: all 0.2s; }
+  .course-item:hover { transform: translateX(3px); }
+  .course-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--blush); display: flex; align-items: center; justify-content: center; font-size: 12px; color: transparent; flex-shrink: 0; transition: all 0.2s; }
+  .course-checked { background: var(--sage); border-color: var(--sage); color: white; }
+  .course-info { flex: 1; }
+  .course-name { font-size: 14px; font-weight: 500; color: var(--deep); }
+  .course-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .course-done .course-name { text-decoration: line-through; color: var(--muted); }
+
+  .add-course-row { display: flex; gap: 8px; align-items: center; }
+  .add-course-btn { width: 44px; height: 44px; border-radius: 12px; background: var(--rose); color: white; border: none; font-size: 22px; cursor: pointer; flex-shrink: 0; transition: all 0.2s; }
+  .add-course-btn:hover { background: var(--deep); }
+
+  .assign-courses-row { display: flex; gap: 10px; }
+  .assign-btn { flex: 1; text-align: center; padding: 12px; border-radius: 14px; background: var(--warm); font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+  .active-assign { border-color: var(--rose); background: white; color: var(--deep); }
+
+  /* Repas */
+  .temps-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .temps-btn { flex: 1; text-align: center; padding: 12px 8px; border-radius: 14px; background: var(--warm); font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+  .temps-btn:hover { border-color: var(--rose); }
+  .active-temps { border-color: var(--rose); background: white; color: var(--deep); box-shadow: 0 4px 12px rgba(196,113,90,0.12); }
+
+  .repas-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .repas-card { background: white; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(45,36,32,0.05); cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+  .repas-card:hover { border-color: var(--blush); transform: translateY(-2px); }
+  .repas-card.selected { border-color: var(--rose); background: #FFF8F6; }
+  .repas-emoji { font-size: 32px; flex-shrink: 0; }
+  .repas-info { flex: 1; }
+  .repas-name { font-size: 14px; font-weight: 600; color: var(--deep); margin-bottom: 3px; }
+  .repas-meta { font-size: 11px; color: var(--muted); }
+  .repas-assign-btn { font-size: 12px; font-weight: 500; color: var(--rose); background: #FFF0EB; padding: 6px 12px; border-radius: 20px; flex-shrink: 0; }
+
+  .menu-semaine { display: flex; flex-direction: column; gap: 6px; }
+  .menu-jour { background: white; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 6px rgba(45,36,32,0.04); }
+  .today-menu { border-left: 3px solid var(--rose); background: #FFF8F6; }
+  .jour-label { font-size: 12px; font-weight: 600; color: var(--muted); width: 36px; flex-shrink: 0; }
+  .jour-repas { flex: 1; font-size: 13px; font-weight: 500; color: var(--deep); }
+  .jour-qui { font-size: 12px; color: var(--muted); }
+
+  /* Cartes fidélité */
+  .cartes-intro { background: linear-gradient(135deg, #FFF0EB, #EEF6F3); border-radius: 14px; padding: 12px 16px; font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+  .cartes-list { display: flex; flex-direction: column; gap: 10px; }
+  .carte-item { background: white; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(45,36,32,0.05); cursor: pointer; transition: all 0.2s; }
+  .carte-item:hover { transform: translateX(4px); box-shadow: 0 4px 16px rgba(45,36,32,0.1); }
+  .carte-logo { width: 48px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+  .carte-info { flex: 1; }
+  .carte-name { font-size: 14px; font-weight: 600; color: var(--deep); }
+  .carte-num { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .carte-arrow { font-size: 20px; color: var(--muted); }
+
+  /* Modal carte affichée */
+  .carte-modal { position: fixed; inset: 0; background: rgba(45,36,32,0.6); backdrop-filter: blur(6px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 24px; }
+  .carte-modal.open { display: flex; }
+  .carte-display { background: white; border-radius: 24px; padding: 24px; width: 100%; max-width: 340px; }
+  .carte-display-inner { border-radius: 16px; padding: 24px; margin-bottom: 8px; background: linear-gradient(135deg, var(--deep), #5A3A34); }
+  .carte-display-name { color: white; font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .carte-display-num { color: rgba(255,255,255,0.8); font-size: 18px; font-family: monospace; letter-spacing: 0.1em; margin-bottom: 16px; }
+  .carte-barcode { background: white; border-radius: 8px; padding: 10px; }
+  .barcode-lines { height: 50px; background: repeating-linear-gradient(90deg, #000 0px, #000 2px, white 2px, white 4px, #000 4px, #000 5px, white 5px, white 8px, #000 8px, #000 9px, white 9px, white 12px); border-radius: 4px; }
+
+  /* Code tabs */
+  .code-tabs { display: flex; gap: 6px; background: var(--warm); border-radius: 12px; padding: 4px; margin: 12px 0 8px; }
+  .code-tab { flex: 1; text-align: center; padding: 8px 6px; font-size: 12px; font-weight: 500; color: var(--muted); border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+  .code-tab.active { background: white; color: var(--deep); box-shadow: 0 2px 6px rgba(45,36,32,0.08); }
+  .code-view { display: none; }
+  .code-view.active-code-view { display: block; animation: fadeUp 0.25s ease both; }
+
+  .carte-barcode { background: white; border-radius: 12px; padding: 14px; text-align: center; }
+  .barcode-num { font-size: 13px; font-family: monospace; color: var(--deep); margin-top: 8px; letter-spacing: 0.08em; }
+  .qr-container { background: white; border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: center; }
+  #qr-canvas { border-radius: 8px; }
+
+
+  .photo-carte-view { background: white; border-radius: 12px; padding: 16px; text-align: center; }
+  .photo-carte-empty { padding: 8px 0; }
+  .save-carte-row { display: flex; gap: 8px; margin-top: 12px; }
+  .save-carte-btn { flex: 1; padding: 12px 8px; border-radius: 14px; border: none; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; background: var(--deep); color: var(--cream); }
+  .save-carte-btn:hover { background: var(--rose); transform: translateY(-1px); }
+  .save-carte-btn.secondary { background: var(--warm); color: var(--deep); }
+  #screen-category {
+    background: var(--cream);
+  }
+
+  .cat-header {
+    padding: 52px 24px 24px;
+    background: var(--deep);
+    position: relative;
+  }
+  .cat-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 0; right: 0;
+    height: 60px;
+    background: var(--cream);
+    border-radius: 30px 30px 0 0;
+  }
+
+  .back-btn {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: var(--cream);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cat-header-icon { font-size: 40px; margin-bottom: 8px; }
+  .cat-header-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--cream);
+  }
+
+  .cat-body {
+    padding: 16px 20px 120px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+  }
+  .empty-state .big { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px);
+    background: var(--deep);
+    color: var(--cream);
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    z-index: 500;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .color-courses { background: #E8C4B0; }
+  .color-factures { background: #B8D4CA; }
+  .color-enfants { background: #F5D5A8; }
+  .color-maison { background: #C4B8D4; }
+  .color-voiture { background: #B8C4D4; }
+  .color-social { background: #D4B8C4; }
+  .color-divers { background: #D4C4B8; }
+
+  .dot-courses { background: #C4715A; }
+  .dot-factures { background: #7A9E8E; }
+  .dot-enfants { background: #C49A44; }
+  .dot-maison { background: #8B70B5; }
+  .dot-voiture { background: #5A7A9E; }
+  .dot-social { background: #9E5A7A; }
+  .dot-divers { background: #8C7B74; }
+
+  /* ── NOTIFICATIONS ── */
+  .notif-phone {
+    background: var(--deep);
+    border-radius: 20px;
+    padding: 12px;
+    margin-bottom: 4px;
+  }
+  .phone-bar {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 11px;
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+  .notif-preview {
+    background: rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    animation: fadeUp 0.4s ease both;
+  }
+  .notif-preview-normal { animation-delay: 0.15s; }
+  .notif-app-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .notif-app-icon { font-size: 14px; }
+  .notif-app-name { font-size: 11px; color: var(--muted); flex: 1; }
+  .notif-time { font-size: 11px; color: var(--muted); }
+  .notif-title-text { font-size: 13px; font-weight: 500; color: var(--cream); margin-bottom: 3px; }
+  .notif-body-text { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+  /* Settings */
+  .settings-card {
+    background: white;
+    border-radius: 20px;
+    padding: 4px 16px;
+    box-shadow: 0 2px 12px rgba(45,36,32,0.06);
+    margin-bottom: 4px;
+  }
+  .setting-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+  }
+  .setting-info { flex: 1; }
+  .setting-label { font-size: 14px; font-weight: 500; color: var(--deep); }
+  .setting-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .setting-divider { height: 1px; background: rgba(45,36,32,0.06); }
+
+  /* Toggle */
+  .toggle {
+    width: 44px; height: 26px;
+    border-radius: 13px;
+    background: rgba(45,36,32,0.12);
+    cursor: pointer;
+    transition: background 0.3s;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .toggle.active { background: var(--rose); }
+  .toggle-knob {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: white;
+    position: absolute;
+    top: 3px; left: 3px;
+    transition: transform 0.3s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle.active .toggle-knob { transform: translateX(18px); }
+
+  /* Time slots */
+  .time-slots { display: flex; flex-wrap: wrap; gap: 8px; }
+  .time-slot {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(45,36,32,0.12);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--cream);
+    color: var(--deep);
+  }
+  .time-slot:hover { border-color: var(--rose); }
+  .time-slot.selected { background: var(--rose); color: white; border-color: var(--rose); }
+
+  /* Recur tasks */
+  .recur-task-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+  }
+  .recur-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .recur-info { flex: 1; }
+  .recur-badge {
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--warm);
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── ÉQUILIBRE ── */
+  .equilibre-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(45,36,32,0.06);
+    margin-bottom: 4px;
+  }
+  .eq-profiles {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .eq-profile { text-align: center; flex-shrink: 0; }
+  .eq-avatar { font-size: 28px; }
+  .eq-name { font-size: 12px; font-weight: 500; color: var(--deep); margin-top: 2px; }
+  .eq-count { font-size: 11px; color: var(--muted); }
+  .eq-pct { font-size: 18px; font-weight: 700; margin-top: 2px; }
+  .eq-bar-container { flex: 1; }
+  .eq-bar {
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    background: var(--warm);
+    margin-bottom: 6px;
+  }
+  .eq-fill-left {
+    height: 100%;
+    background: var(--urgent);
+    border-radius: 6px 0 0 6px;
+    transition: width 1s ease;
+  }
+  .eq-fill-right {
+    height: 100%;
+    background: var(--sage);
+    border-radius: 0 6px 6px 0;
+    transition: width 1s ease;
+  }
+  .eq-ideal { font-size: 11px; color: var(--muted); text-align: center; }
+  .eq-message {
+    background: var(--warm);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Cat eq */
+  .cat-eq-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; }
+  .cat-eq-icon { font-size: 20px; flex-shrink: 0; }
+  .cat-eq-info { flex: 1; }
+  .cat-eq-name { font-size: 13px; font-weight: 500; color: var(--deep); margin-bottom: 5px; }
+  .mini-bar { height: 6px; background: var(--warm); border-radius: 3px; overflow: hidden; }
+  .mini-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+  .cat-eq-split { font-size: 11px; flex-shrink: 0; text-align: right; }
+
+  /* Suggestions */
+  .suggestion-card {
+    background: white;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 2px 12px rgba(45,36,32,0.06);
+    margin-bottom: 12px;
+    animation: fadeUp 0.4s ease both;
+    transition: all 0.3s;
+  }
+  .suggestion-card.done { opacity: 0; transform: translateX(60px); pointer-events: none; }
+  .suggestion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .suggestion-tag { font-size: 11px; font-weight: 500; color: var(--muted); background: var(--warm); padding: 3px 10px; border-radius: 20px; }
+  .suggestion-action-label { font-size: 11px; color: var(--rose); font-weight: 500; }
+  .suggestion-title { font-size: 15px; font-weight: 600; color: var(--deep); margin-bottom: 6px; }
+  .suggestion-body { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+  .suggestion-btns { display: flex; gap: 8px; }
+  .sug-btn {
+    padding: 9px 16px;
+    border-radius: 20px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .sug-btn.accept { background: var(--deep); color: var(--cream); flex: 1; }
+  .sug-btn.accept:hover { background: var(--rose); }
+  .sug-btn.decline { background: var(--warm); color: var(--muted); }
+
+  /* Evolution bars */
+  .evolution-row { display: flex; gap: 12px; align-items: flex-end; justify-content: center; margin-bottom: 12px; height: 100px; }
+  .evo-week { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; height: 100%; }
+  .evo-label { font-size: 10px; color: var(--muted); font-weight: 500; }
+  .evo-bar-wrap { flex: 1; display: flex; align-items: flex-end; width: 100%; }
+  .evo-bar-bg { width: 100%; height: 100%; background: var(--warm); border-radius: 6px; display: flex; align-items: flex-end; overflow: hidden; }
+  .evo-bar-fill { width: 100%; border-radius: 6px; transition: height 1s ease; }
+  .evo-pct { font-size: 11px; font-weight: 600; color: var(--deep); }
+  .evo-message { text-align: center; font-size: 13px; color: var(--sage); font-weight: 500; }
+
+  /* ── ÉQUILIBRE ── */
+  .equilibre-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(45,36,32,0.06);
+    margin-bottom: 4px;
+  }
+  .eq-avatars { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+  .eq-avatar-block { flex: 1; text-align: center; }
+  .eq-avatar { font-size: 36px; margin-bottom: 6px; }
+  .eq-name { font-size: 13px; font-weight: 500; color: var(--deep); }
+  .eq-score { font-size: 28px; font-weight: 700; margin: 4px 0; font-family: 'Playfair Display', serif; }
+  .eq-tasks { font-size: 11px; color: var(--muted); }
+  .eq-middle { text-align: center; }
+  .eq-vs { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 6px; }
+  .eq-message { font-size: 11px; color: var(--muted); line-height: 1.4; max-width: 70px; }
+
+  .eq-bar-wrap { margin-bottom: 16px; }
+  .eq-bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 6px; }
+  .eq-bar-sophie { background: var(--rose); transition: width 1s ease; }
+  .eq-bar-marc { background: var(--sage); transition: width 1s ease; }
+  .eq-bar-labels { display: flex; justify-content: space-between; font-size: 11px; font-weight: 500; }
+
+  .eq-tip {
+    background: var(--warm);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .cat-eq-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; }
+  .cat-eq-icon { font-size: 20px; flex-shrink: 0; }
+  .cat-eq-info { flex: 1; }
+  .cat-eq-name { font-size: 13px; font-weight: 500; color: var(--deep); margin-bottom: 6px; }
+  .eq-mini-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--warm); }
+  .eq-mini-sophie { background: var(--rose); transition: width 0.8s ease; }
+  .eq-mini-marc { background: var(--sage); transition: width 0.8s ease; }
+  .cat-eq-split { font-size: 12px; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+
+  /* Chart */
+  .chart-wrap { }
+  .chart-bars { display: flex; gap: 16px; align-items: flex-end; height: 100px; margin-bottom: 12px; }
+  .chart-week { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
+  .chart-col-wrap { flex: 1; width: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; border-radius: 6px; overflow: hidden; }
+  .chart-bar-s { background: var(--rose); opacity: 0.8; border-radius: 4px 4px 0 0; transition: height 1s ease; }
+  .chart-bar-m { background: var(--sage); opacity: 0.8; border-radius: 0 0 4px 4px; transition: height 1s ease; }
+  .chart-label { font-size: 10px; color: var(--muted); text-align: center; }
+  .chart-legend { display: flex; gap: 16px; justify-content: center; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* IA Suggestion */
+  .ia-suggest-card {
+    background: linear-gradient(135deg, var(--deep), #4a3830);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .ia-icon { font-size: 28px; }
+  .ia-title { font-size: 14px; font-weight: 500; color: var(--cream); margin-bottom: 3px; }
+  .ia-sub { font-size: 12px; color: var(--muted); }
+
+  .suggest-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .suggest-task {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(45,36,32,0.05);
+    animation: fadeUp 0.4s ease both;
+  }
+  .suggest-info { flex: 1; }
+  .suggest-title { font-size: 13px; font-weight: 500; color: var(--deep); margin-bottom: 3px; }
+  .suggest-meta { font-size: 11px; color: var(--muted); }
+  .suggest-btn {
+    background: var(--sage);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .suggest-btn:hover { background: #6a8e7e; }
+
+  /* ── SUGGESTIONS ARTICLES ── */
+  .suggestions-list { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+  .suggestion-item { background: white; border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1.5px solid var(--blush); transition: all 0.2s; animation: fadeUp 0.2s ease both; box-shadow: 0 2px 8px rgba(45,36,32,0.06); }
+  .suggestion-item:hover { border-color: var(--rose); transform: translateX(3px); }
+  .suggestion-photo { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+  .suggestion-photo-placeholder { width: 36px; height: 36px; border-radius: 8px; background: var(--warm); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .suggestion-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--deep); }
+  .suggestion-mag { font-size: 11px; color: var(--muted); }
+  .suggestion-add { font-size: 18px; color: var(--rose); font-weight: 700; }
+
+  /* ── ENFANTS ── */
+  .enfants-selector { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 4px; scrollbar-width: none; }
+  .enfants-selector::-webkit-scrollbar { display: none; }
+  .enfant-tab { flex-shrink: 0; background: white; border-radius: 16px; padding: 12px 16px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; box-shadow: 0 2px 8px rgba(45,36,32,0.05); min-width: 72px; }
+  .enfant-tab.active { border-color: var(--rose); box-shadow: 0 4px 14px rgba(196,113,90,0.15); }
+  .enfant-tab-avatar { font-size: 28px; margin-bottom: 4px; }
+  .enfant-tab-name { font-size: 11px; font-weight: 600; color: var(--deep); }
+  .add-enfant-tab { background: var(--warm); border: 2px dashed var(--blush); }
+  .add-enfant-tab .enfant-tab-avatar { font-size: 22px; color: var(--rose); }
+  .add-enfant-tab .enfant-tab-name { color: var(--rose); }
+
+  .enfant-header-card { background: linear-gradient(135deg, var(--deep), #5A3A34); border-radius: 20px; padding: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; }
+  .enfant-big-avatar { font-size: 48px; }
+  .enfant-header-info { flex: 1; }
+  .enfant-header-name { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--cream); }
+  .enfant-header-age { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .enfant-header-stats { display: flex; gap: 8px; margin-top: 10px; }
+  .enfant-stat { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px 12px; font-size: 12px; color: rgba(255,255,255,0.7); }
+
+  .enfant-sections { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .enfant-section-btn { flex: 1; min-width: 45%; background: white; border-radius: 16px; padding: 14px 12px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; box-shadow: 0 2px 8px rgba(45,36,32,0.05); }
+  .enfant-section-btn:hover { border-color: var(--blush); }
+  .enfant-section-btn.active-section { border-color: var(--rose); background: #FFF8F6; }
+  .enfant-section-icon { font-size: 26px; margin-bottom: 6px; }
+  .enfant-section-name { font-size: 12px; font-weight: 600; color: var(--deep); }
+  .enfant-section-count { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .enfant-detail { animation: fadeUp 0.3s ease both; }
+
+  /* Tailles */
+  .tailles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .taille-card { background: white; border-radius: 14px; padding: 14px; text-align: center; box-shadow: 0 2px 8px rgba(45,36,32,0.05); }
+  .taille-icon { font-size: 24px; margin-bottom: 6px; }
+  .taille-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .taille-val { font-size: 18px; font-weight: 700; color: var(--deep); }
+  .taille-date { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* Événements enfant */
+  .enfant-event { background: white; border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(45,36,32,0.05); }
+  .enfant-event-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .enfant-event-info { flex: 1; }
+  .enfant-event-name { font-size: 14px; font-weight: 500; color: var(--deep); }
+  .enfant-event-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .enfant-event-qui { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; }
+  .enfant-event-qui.moi { background: #EEF6F3; color: var(--sage); }
+  .enfant-event-qui.lui { background: #FFF0EB; color: var(--rose); }
+
+  /* Santé */
+  .vaccin-row { background: white; border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(45,36,32,0.05); }
+  .vaccin-status { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .vaccin-status.done { background: #EEF6F3; }
+  .vaccin-status.todo { background: #FFF0EB; }
+  .vaccin-info { flex: 1; }
+  .vaccin-name { font-size: 13px; font-weight: 500; color: var(--deep); }
+  .vaccin-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Anniversaires copains */
+  .copain-row { background: white; border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(45,36,32,0.05); }
+  .copain-avatar { font-size: 28px; }
+  .copain-info { flex: 1; }
+  .copain-name { font-size: 14px; font-weight: 500; color: var(--deep); }
+  .copain-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .copain-countdown { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+  .copain-countdown.soon { background: #FFF0EB; color: var(--rose); }
+  .copain-countdown.ok { background: #EEF6F3; color: var(--sage); }
+  .course-photo { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; flex-shrink: 0; cursor: pointer; border: 2px solid var(--warm); transition: transform 0.2s; }
+  .course-photo:hover { transform: scale(1.05); }
+  .course-photo-placeholder { width: 44px; height: 44px; border-radius: 10px; background: var(--warm); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; cursor: pointer; border: 2px dashed var(--blush); transition: all 0.2s; }
+  .course-photo-placeholder:hover { background: var(--blush); }
+
+  .photo-zoom-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500; display: none; align-items: center; justify-content: center; padding: 24px; }
+  .photo-zoom-overlay.open { display: flex; }
+  .photo-zoom-overlay img { max-width: 100%; max-height: 80vh; border-radius: 16px; object-fit: contain; }
+
+  /* ── À SAISIR FAB ── */
+  .saisir-fab {
+    position: fixed;
+    bottom: 90px; left: 20px;
+    background: var(--deep);
+    color: var(--cream);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(45,36,32,0.35);
+    transition: all 0.3s;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    z-index: 98;
+    animation: fadeUp 0.4s ease both;
+  }
+  .saisir-fab.visible { display: flex; }
+  .saisir-fab:hover { background: var(--rose); transform: translateY(-2px); }
+  .saisir-count { background: var(--rose); color: white; border-radius: 20px; padding: 2px 8px; font-size: 12px; font-weight: 700; min-width: 20px; text-align: center; }
+
+  /* Modal À saisir */
+  .saisir-modal { position: fixed; inset: 0; background: rgba(45,36,32,0.5); backdrop-filter: blur(4px); z-index: 300; display: none; align-items: flex-end; }
+  .saisir-modal.open { display: flex; }
+  .saisir-sheet { background: var(--cream); border-radius: 28px 28px 0 0; padding: 28px 24px 48px; width: 100%; max-height: 80vh; overflow-y: auto; animation: slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+  .saisir-empty { text-align: center; padding: 32px 16px; color: var(--muted); }
+  .saisir-empty .big { font-size: 40px; margin-bottom: 10px; }
+
+  .saisir-task-row { background: white; border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(45,36,32,0.05); }
+  .saisir-task-info { flex: 1; }
+  .saisir-task-name { font-size: 14px; font-weight: 500; color: var(--deep); }
+  .saisir-task-cat { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .saisir-take-btn { background: var(--sage); color: white; border: none; padding: 8px 14px; border-radius: 20px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+  .saisir-take-btn:hover { background: var(--deep); }
+  .add-saisir-row { display: flex; gap: 8px; margin-top: 12px; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ ACCUEIL ═══════════════════ -->
+<div id="screen-home" class="screen active">
+  <!-- ÉTAPE 1 : Profils -->
+  <div id="step-1" class="onboarding-step active-step">
+    <div class="home-logo">Ma <span>Décharge</span><br>Mentale</div>
+    <div class="home-tagline">Posez tout ici. Respirez enfin.</div>
+
+    <div class="onboarding-card">
+      <div class="step-label">Étape 1 sur 2 · Créez vos profils</div>
+
+      <div class="profile-row">
+        <div class="profile-block">
+          <div class="avatar-label">Vous</div>
+          <div class="avatar-picker" id="picker-1">
+            <div class="avatar-option selected" onclick="pickAvatar(1,this)">🧑</div>
+            <div class="avatar-option" onclick="pickAvatar(1,this)">👩</div>
+            <div class="avatar-option" onclick="pickAvatar(1,this)">👨</div>
+            <div class="avatar-option" onclick="pickAvatar(1,this)">👩🏽</div>
+            <div class="avatar-option" onclick="pickAvatar(1,this)">👨🏽</div>
+            <div class="avatar-option" onclick="pickAvatar(1,this)">🧑🏽</div>
+            <div class="avatar-option" onclick="pickAvatar(1,this)">👩🏿</div>
+            <div class="avatar-option" onclick="pickAvatar(1,this)">👨🏿</div>
+          </div>
+          <input class="form-input" id="name-1" placeholder="Votre prénom" style="margin-top:10px">
+        </div>
+
+        <div class="profile-divider">💛</div>
+
+        <div class="profile-block">
+          <div class="avatar-label">Partenaire</div>
+          <div class="avatar-picker" id="picker-2">
+            <div class="avatar-option selected" onclick="pickAvatar(2,this)">🧑</div>
+            <div class="avatar-option" onclick="pickAvatar(2,this)">👩</div>
+            <div class="avatar-option" onclick="pickAvatar(2,this)">👨</div>
+            <div class="avatar-option" onclick="pickAvatar(2,this)">👩🏽</div>
+            <div class="avatar-option" onclick="pickAvatar(2,this)">👨🏽</div>
+            <div class="avatar-option" onclick="pickAvatar(2,this)">🧑🏽</div>
+            <div class="avatar-option" onclick="pickAvatar(2,this)">👩🏿</div>
+            <div class="avatar-option" onclick="pickAvatar(2,this)">👨🏿</div>
+          </div>
+          <input class="form-input" id="name-2" placeholder="Son prénom" style="margin-top:10px">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="goStep2()">Suivant →</button>
+  </div>
+
+  <!-- ÉTAPE 2 : Qui gère ? -->
+  <div id="step-2" class="onboarding-step">
+    <div class="home-logo" style="font-size:32px">Une dernière<br><span>question…</span></div>
+    <div class="home-tagline">Dans votre couple, qui gère le plus en ce moment ?</div>
+
+    <div class="who-manages" id="who-manages">
+      <div class="manage-btn" onclick="selectManage(this)">
+        <div class="manage-emoji" id="manage-emoji-1">🧑</div>
+        <div class="manage-label" id="manage-label-1">Moi</div>
+        <div class="manage-sub">Je pense à tout 😮‍💨</div>
+      </div>
+      <div class="manage-btn" onclick="selectManage(this)">
+        <div class="manage-emoji" id="manage-emoji-2">🧑</div>
+        <div class="manage-label" id="manage-label-2">Mon partenaire</div>
+        <div class="manage-sub">Je veux mieux aider</div>
+      </div>
+      <div class="manage-btn" onclick="selectManage(this)" style="grid-column: span 2;">
+        <div class="manage-emoji">⚖️</div>
+        <div class="manage-label">On est équilibrés</div>
+        <div class="manage-sub">On optimise ensemble</div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="goTo('dashboard')">C'est parti ! →</button>
+    <button class="btn-back" onclick="goStep1()">← Retour</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ DASHBOARD ═══════════════════ -->
+<div id="screen-dashboard" class="screen">
+  <div class="top-bar">
+    <div class="top-greeting">Bonjour, <span>Sophie</span> ☀️</div>
+    <div class="top-sub">7 tâches en cours · 2 urgentes</div>
+
+    <div class="score-bar">
+      <div class="score-pill">
+        <span class="emoji">👩</span>
+        <div>
+          <div class="name">Sophie</div>
+          <div class="val">12 tâches</div>
+        </div>
+      </div>
+      <div class="score-pill">
+        <span class="emoji">👨</span>
+        <div>
+          <div class="name">Marc</div>
+          <div class="val">5 tâches</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="balance-indicator">
+      <div class="balance-track">
+        <div class="balance-fill"></div>
+      </div>
+      <div class="balance-label">Déséquilibre 68%</div>
+    </div>
+  </div>
+
+  <div class="dashboard-body">
+    <div class="section-title">Catégories</div>
+    <div class="categories-grid">
+      <div class="cat-card has-urgent" onclick="openCategory('courses')">
+        <div class="cat-accent color-courses" style="background:#C4715A"></div>
+        <span class="cat-icon">🛒</span>
+        <div class="cat-name">Courses & Repas</div>
+        <div class="cat-count">3 tâches</div>
+      </div>
+      <div class="cat-card" onclick="openCategory('factures')">
+        <div class="cat-accent" style="background:#7A9E8E"></div>
+        <span class="cat-icon">💰</span>
+        <div class="cat-name">Factures & Admin</div>
+        <div class="cat-count">1 tâche</div>
+      </div>
+      <div class="cat-card has-urgent" onclick="goTo('enfants')">
+        <div class="cat-accent" style="background:#C49A44"></div>
+        <span class="cat-icon">👶</span>
+        <div class="cat-name">Enfants</div>
+        <div class="cat-count">2 tâches</div>
+      </div>
+      <div class="cat-card" onclick="openCategory('maison')">
+        <div class="cat-accent" style="background:#8B70B5"></div>
+        <span class="cat-icon">🏠</span>
+        <div class="cat-name">Maison</div>
+        <div class="cat-count">1 tâche</div>
+      </div>
+      <div class="cat-card" onclick="openCategory('voiture')">
+        <div class="cat-accent" style="background:#5A7A9E"></div>
+        <span class="cat-icon">🚗</span>
+        <div class="cat-name">Voiture</div>
+        <div class="cat-count">0 tâche</div>
+      </div>
+      <div class="cat-card" onclick="openCategory('social')">
+        <div class="cat-accent" style="background:#9E5A7A"></div>
+        <span class="cat-icon">❤️</span>
+        <div class="cat-name">Famille & Social</div>
+        <div class="cat-count">0 tâche</div>
+      </div>
+      <div class="cat-card" onclick="openCategory('divers')" style="grid-column: span 2;">
+        <div class="cat-accent" style="background:#8C7B74"></div>
+        <span class="cat-icon">🔧</span>
+        <div class="cat-name">Divers</div>
+        <div class="cat-count">Contacter le voisin pour le mur…</div>
+      </div>
+    </div>
+
+    <div class="section-title">Urgentes aujourd'hui</div>
+    <div class="urgent-list">
+      <div class="task-card" style="animation-delay:0.05s">
+        <div class="task-cat-dot dot-enfants"></div>
+        <div class="task-info">
+          <div class="task-title">Spectacle école Emma</div>
+          <div class="task-meta">👶 Enfants · Demain 18h</div>
+        </div>
+        <span class="task-assignee lui">Marc</span>
+        <div class="urgency-dot high"></div>
+      </div>
+      <div class="task-card" style="animation-delay:0.1s">
+        <div class="task-cat-dot dot-courses"></div>
+        <div class="task-info">
+          <div class="task-title">Acheter PQ + lessive</div>
+          <div class="task-meta">🛒 Courses · Aujourd'hui</div>
+        </div>
+        <span class="task-assignee moi">Moi</span>
+        <div class="urgency-dot high"></div>
+      </div>
+      <div class="task-card" style="animation-delay:0.15s">
+        <div class="task-cat-dot dot-factures"></div>
+        <div class="task-info">
+          <div class="task-title">Payer assurance voiture</div>
+          <div class="task-meta">💰 Factures · Dans 3 jours</div>
+        </div>
+        <span class="task-assignee deux">Tous les deux</span>
+        <div class="urgency-dot medium"></div>
+      </div>
+    </div>
+
+    <div class="section-title">Récurrentes cette semaine</div>
+    <div class="urgent-list">
+      <div class="task-card" style="animation-delay:0.2s">
+        <div class="task-cat-dot dot-maison"></div>
+        <div class="task-info">
+          <div class="task-title">Poubelle noire</div>
+          <div class="task-meta">🏠 Maison · Dimanche · Chaque semaine</div>
+        </div>
+        <span class="task-assignee lui">Marc</span>
+        <div class="urgency-dot low"></div>
+      </div>
+      <div class="task-card" style="animation-delay:0.25s">
+        <div class="task-cat-dot dot-maison"></div>
+        <div class="task-info">
+          <div class="task-title">Poubelle jaune</div>
+          <div class="task-meta">🏠 Maison · Mardi · 1 semaine / 2</div>
+        </div>
+        <span class="task-assignee lui">Marc</span>
+        <div class="urgency-dot low"></div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="goTo('dashboard')"><span class="nav-icon">🏡</span><span class="nav-label">Accueil</span></div>
+    <div class="nav-item" onclick="goTo('courses')"><span class="nav-icon">🛒</span><span class="nav-label">Courses</span></div>
+    <div class="nav-item" onclick="goTo('equilibre')"><span class="nav-icon">⚖️</span><span class="nav-label">Équilibre</span></div>
+    <div class="nav-item" onclick="goTo('couple')"><span class="nav-icon">👥</span><span class="nav-label">Couple</span></div>
+  </nav>
+
+  <button class="fab" onclick="openModal()">+</button>
+</div>
+
+<!-- ═══════════════════ CATÉGORIE ═══════════════════ -->
+<div id="screen-category" class="screen">
+  <div class="cat-header">
+    <button class="back-btn" onclick="goTo('dashboard')">←</button>
+    <div class="cat-header-icon" id="cat-icon">🛒</div>
+    <div class="cat-header-name" id="cat-name">Courses & Repas</div>
+  </div>
+  <div class="cat-body" id="cat-body"></div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="goTo('dashboard')"><span class="nav-icon">🏡</span><span class="nav-label">Accueil</span></div>
+    <div class="nav-item" onclick="goTo('courses')"><span class="nav-icon">🛒</span><span class="nav-label">Courses</span></div>
+    <div class="nav-item" onclick="goTo('equilibre')"><span class="nav-icon">⚖️</span><span class="nav-label">Équilibre</span></div>
+    <div class="nav-item" onclick="goTo('couple')"><span class="nav-icon">👥</span><span class="nav-label">Couple</span></div>
+  </nav>
+  <button class="fab" onclick="openModal()">+</button>
+</div>
+
+<!-- ═══════════════════ ÉQUILIBRE ═══════════════════ -->
+<div id="screen-equilibre" class="screen">
+  <div class="top-bar">
+    <div class="top-greeting">Notre <span>Équilibre</span> ⚖️</div>
+    <div class="top-sub">Cette semaine · 17 tâches au total</div>
+  </div>
+
+  <div class="dashboard-body">
+
+    <!-- Score visuel -->
+    <div class="section-title">Répartition globale</div>
+    <div class="equilibre-card">
+      <div class="eq-profiles">
+        <div class="eq-profile">
+          <div class="eq-avatar">🧑</div>
+          <div class="eq-name">Sophie</div>
+          <div class="eq-count">12 tâches</div>
+          <div class="eq-pct" style="color:var(--urgent)">71%</div>
+        </div>
+        <div class="eq-bar-container">
+          <div class="eq-bar">
+            <div class="eq-fill-left" style="width:71%"></div>
+            <div class="eq-fill-right" style="width:29%"></div>
+          </div>
+          <div class="eq-ideal">Idéal : 50% / 50%</div>
+        </div>
+        <div class="eq-profile">
+          <div class="eq-avatar">🧑</div>
+          <div class="eq-name">Marc</div>
+          <div class="eq-count">5 tâches</div>
+          <div class="eq-pct" style="color:var(--sage)">29%</div>
+        </div>
+      </div>
+
+      <div class="eq-message">
+        💬 <em>Sophie porte 71% de la charge cette semaine. L'équilibre idéal serait autour de 50/50.</em>
+      </div>
+    </div>
+
+    <!-- Par catégorie -->
+    <div class="section-title">Par catégorie</div>
+    <div class="settings-card">
+      <div class="cat-eq-row">
+        <span class="cat-eq-icon">🛒</span>
+        <div class="cat-eq-info">
+          <div class="cat-eq-name">Courses & Repas</div>
+          <div class="mini-bar"><div class="mini-fill" style="width:80%;background:var(--urgent)"></div></div>
+        </div>
+        <div class="cat-eq-split">
+          <span style="color:var(--urgent)">Sophie 80%</span>
+          <span style="color:var(--muted)"> · Marc 20%</span>
+        </div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="cat-eq-row">
+        <span class="cat-eq-icon">👶</span>
+        <div class="cat-eq-info">
+          <div class="cat-eq-name">Enfants</div>
+          <div class="mini-bar"><div class="mini-fill" style="width:60%;background:#E8A84A"></div></div>
+        </div>
+        <div class="cat-eq-split">
+          <span style="color:#E8A84A">Sophie 60%</span>
+          <span style="color:var(--muted)"> · Marc 40%</span>
+        </div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="cat-eq-row">
+        <span class="cat-eq-icon">🏠</span>
+        <div class="cat-eq-info">
+          <div class="cat-eq-name">Maison</div>
+          <div class="mini-bar"><div class="mini-fill" style="width:30%;background:var(--sage)"></div></div>
+        </div>
+        <div class="cat-eq-split">
+          <span style="color:var(--sage)">Sophie 30%</span>
+          <span style="color:var(--muted)"> · Marc 70%</span>
+        </div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="cat-eq-row">
+        <span class="cat-eq-icon">💰</span>
+        <div class="cat-eq-info">
+          <div class="cat-eq-name">Factures & Admin</div>
+          <div class="mini-bar"><div class="mini-fill" style="width:50%;background:var(--sage)"></div></div>
+        </div>
+        <div class="cat-eq-split">
+          <span style="color:var(--sage)">50%</span>
+          <span style="color:var(--muted)"> · 50%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suggestions IA -->
+    <div class="section-title">✨ Suggestions pour rééquilibrer</div>
+    <div class="suggestion-card" onclick="acceptSuggestion(this)">
+      <div class="suggestion-header">
+        <div class="suggestion-tag">🛒 Courses & Repas</div>
+        <div class="suggestion-action-label">Transférer à Marc →</div>
+      </div>
+      <div class="suggestion-title">Confier les courses du week-end à Marc</div>
+      <div class="suggestion-body">Tu fais les courses 4 fois sur 5. Proposer à Marc de prendre le relais le samedi matin libérerait 45min de ta charge hebdomadaire.</div>
+      <div class="suggestion-btns">
+        <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Transférer à Marc</button>
+        <button class="sug-btn decline" onclick="declineSuggestion(this.closest('.suggestion-card'))">Pas maintenant</button>
+      </div>
+    </div>
+
+    <div class="suggestion-card" onclick="">
+      <div class="suggestion-header">
+        <div class="suggestion-tag">👶 Enfants</div>
+        <div class="suggestion-action-label">Partager →</div>
+      </div>
+      <div class="suggestion-title">Le prochain RDV médecin, c'est Marc qui y va</div>
+      <div class="suggestion-body">Tu gères 100% des rendez-vous médicaux. Une fois sur deux suffirait à alléger ta charge mentale sans tout bouleverser.</div>
+      <div class="suggestion-btns">
+        <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Créer le rappel pour Marc</button>
+        <button class="sug-btn decline" onclick="declineSuggestion(this.closest('.suggestion-card'))">Pas maintenant</button>
+      </div>
+    </div>
+
+    <div class="suggestion-card">
+      <div class="suggestion-header">
+        <div class="suggestion-tag">🍽️ Repas</div>
+        <div class="suggestion-action-label">Partager →</div>
+      </div>
+      <div class="suggestion-title">1 soir sur 2, c'est Marc qui décide du repas</div>
+      <div class="suggestion-body">Le "qu'est-ce qu'on mange ?" quotidien pèse lourd. Alterner la décision enlève cette micro-charge qui s'accumule.</div>
+      <div class="suggestion-btns">
+        <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Ajouter la règle</button>
+        <button class="sug-btn decline" onclick="declineSuggestion(this.closest('.suggestion-card'))">Pas maintenant</button>
+      </div>
+    </div>
+
+    <!-- Évolution -->
+    <div class="section-title">Évolution sur 4 semaines</div>
+    <div class="settings-card" style="padding:16px;">
+      <div class="evolution-row">
+        <div class="evo-week">
+          <div class="evo-label">Sem 1</div>
+          <div class="evo-bar-wrap">
+            <div class="evo-bar-bg">
+              <div class="evo-bar-fill" style="height:85%;background:var(--urgent)"></div>
+            </div>
+          </div>
+          <div class="evo-pct">85%</div>
+        </div>
+        <div class="evo-week">
+          <div class="evo-label">Sem 2</div>
+          <div class="evo-bar-wrap">
+            <div class="evo-bar-bg">
+              <div class="evo-bar-fill" style="height:78%;background:#E8A84A"></div>
+            </div>
+          </div>
+          <div class="evo-pct">78%</div>
+        </div>
+        <div class="evo-week">
+          <div class="evo-label">Sem 3</div>
+          <div class="evo-bar-wrap">
+            <div class="evo-bar-bg">
+              <div class="evo-bar-fill" style="height:71%;background:#E8A84A"></div>
+            </div>
+          </div>
+          <div class="evo-pct">71%</div>
+        </div>
+        <div class="evo-week">
+          <div class="evo-label">Objectif</div>
+          <div class="evo-bar-wrap">
+            <div class="evo-bar-bg">
+              <div class="evo-bar-fill" style="height:50%;background:var(--sage)"></div>
+            </div>
+          </div>
+          <div class="evo-pct" style="color:var(--sage)">50%</div>
+        </div>
+      </div>
+      <div class="evo-message">📉 Tu progresses ! -14% de charge en 3 semaines.</div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="goTo('dashboard')"><span class="nav-icon">🏡</span><span class="nav-label">Accueil</span></div>
+    <div class="nav-item" onclick="goTo('courses')"><span class="nav-icon">🛒</span><span class="nav-label">Courses</span></div>
+    <div class="nav-item active" onclick="goTo('equilibre')"><span class="nav-icon">⚖️</span><span class="nav-label">Équilibre</span></div>
+    <div class="nav-item" onclick="goTo('couple')"><span class="nav-icon">👥</span><span class="nav-label">Couple</span></div>
+  </nav>
+</div>
+
+<!-- ═══════════════════ NOTIFICATIONS ═══════════════════ -->
+<div id="screen-notifs" class="screen">
+  <div class="top-bar">
+    <div class="top-greeting">Mes <span>Notifications</span> 🔔</div>
+    <div class="top-sub">Configurez vos rappels personnalisés</div>
+  </div>
+
+  <div class="dashboard-body">
+
+    <!-- Prévisualisation notif -->
+    <div class="section-title">À quoi ça ressemble</div>
+    <div class="notif-phone">
+      <div class="phone-bar">
+        <span>9:41</span>
+        <span>📶</span>
+      </div>
+      <div class="notif-preview" id="notif-preview-urgent">
+        <div class="notif-app-row">
+          <span class="notif-app-icon">🧠</span>
+          <span class="notif-app-name">Ma Décharge Mentale</span>
+          <span class="notif-time">maintenant</span>
+        </div>
+        <div class="notif-title-text">🔴 Urgent — Spectacle école Emma</div>
+        <div class="notif-body-text">Demain 18h · Attribuée à Marc · Pas encore fait ✗</div>
+      </div>
+      <div class="notif-preview notif-preview-normal" id="notif-preview-normal">
+        <div class="notif-app-row">
+          <span class="notif-app-icon">🧠</span>
+          <span class="notif-app-name">Ma Décharge Mentale</span>
+          <span class="notif-time">8:00</span>
+        </div>
+        <div class="notif-title-text">📋 Rappel du jour — 3 tâches t'attendent</div>
+        <div class="notif-body-text">Poubelle noire · Courses · Assurance voiture</div>
+      </div>
+    </div>
+
+    <!-- Réglages urgence -->
+    <div class="section-title">Tâches urgentes 🔴</div>
+    <div class="settings-card">
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">Rappel la veille</div>
+          <div class="setting-sub">Une notif la veille de l'échéance</div>
+        </div>
+        <div class="toggle active" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">Rappel le jour J</div>
+          <div class="setting-sub">À l'heure choisie ci-dessous</div>
+        </div>
+        <div class="toggle active" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">Relance si pas fait</div>
+          <div class="setting-sub">Re-notif 3h après si toujours en attente</div>
+        </div>
+        <div class="toggle active" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+      </div>
+    </div>
+
+    <!-- Réglages normal -->
+    <div class="section-title">Tâches normales 🟡</div>
+    <div class="settings-card">
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">Rappel tous les 2 jours</div>
+          <div class="setting-sub">Jusqu'à ce que la tâche soit faite</div>
+        </div>
+        <div class="toggle active" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+      </div>
+    </div>
+
+    <!-- Heure préférée -->
+    <div class="section-title">Heure de réception 🕐</div>
+    <div class="settings-card">
+      <div class="setting-row" style="flex-direction:column; align-items:flex-start; gap:12px;">
+        <div class="setting-info">
+          <div class="setting-label">Votre heure préférée</div>
+          <div class="setting-sub">Les notifs arriveront à ce moment</div>
+        </div>
+        <div class="time-slots">
+          <div class="time-slot" onclick="selectTime(this)">7h00</div>
+          <div class="time-slot" onclick="selectTime(this)">8h00</div>
+          <div class="time-slot selected" onclick="selectTime(this)">9h00</div>
+          <div class="time-slot" onclick="selectTime(this)">12h00</div>
+          <div class="time-slot" onclick="selectTime(this)">18h00</div>
+          <div class="time-slot" onclick="selectTime(this)">20h00</div>
+        </div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="setting-row" style="flex-direction:column; align-items:flex-start; gap:12px;">
+        <div class="setting-info">
+          <div class="setting-label">Heure du partenaire</div>
+          <div class="setting-sub">Marc reçoit ses notifs à</div>
+        </div>
+        <div class="time-slots">
+          <div class="time-slot" onclick="selectTime(this)">7h00</div>
+          <div class="time-slot selected" onclick="selectTime(this)">8h00</div>
+          <div class="time-slot" onclick="selectTime(this)">9h00</div>
+          <div class="time-slot" onclick="selectTime(this)">12h00</div>
+          <div class="time-slot" onclick="selectTime(this)">18h00</div>
+          <div class="time-slot" onclick="selectTime(this)">20h00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Récurrentes -->
+    <div class="section-title">Tâches récurrentes 🔁</div>
+    <div class="settings-card">
+      <div class="recur-task-row">
+        <div class="recur-dot" style="background:var(--rose)"></div>
+        <div class="recur-info">
+          <div class="setting-label">Poubelle noire</div>
+          <div class="setting-sub">Dimanche · Marc · Chaque semaine</div>
+        </div>
+        <div class="recur-badge">Sam 18h</div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="recur-task-row">
+        <div class="recur-dot" style="background:var(--sage)"></div>
+        <div class="recur-info">
+          <div class="setting-label">Poubelle jaune</div>
+          <div class="setting-sub">Mardi · Marc · 1 sem / 2</div>
+        </div>
+        <div class="recur-badge">Lun 18h</div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="recur-task-row">
+        <div class="recur-dot" style="background:#C49A44"></div>
+        <div class="recur-info">
+          <div class="setting-label">Menu de la semaine</div>
+          <div class="setting-sub">Dimanche · Moi · Chaque semaine</div>
+        </div>
+        <div class="recur-badge">Dim 9h</div>
+      </div>
+    </div>
+
+    <button class="btn-submit" style="margin-top:8px" onclick="saveNotifs()">Enregistrer mes préférences ✓</button>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="goTo('dashboard')"><span class="nav-icon">🏡</span><span class="nav-label">Accueil</span></div>
+    <div class="nav-item" onclick="goTo('courses')"><span class="nav-icon">🛒</span><span class="nav-label">Courses</span></div>
+    <div class="nav-item active" onclick="goTo('equilibre')"><span class="nav-icon">⚖️</span><span class="nav-label">Équilibre</span></div>
+    <div class="nav-item" onclick="goTo('couple')"><span class="nav-icon">👥</span><span class="nav-label">Couple</span></div>
+  </nav>
+</div>
+
+<!-- ═══════════════════ ÉQUILIBRE ═══════════════════ -->
+<div id="screen-equilibre" class="screen">
+  <div class="top-bar">
+    <div class="top-greeting">L'<span>Équilibre</span> du foyer ⚖️</div>
+    <div class="top-sub">Cette semaine · Mis à jour aujourd'hui</div>
+  </div>
+
+  <div class="dashboard-body">
+
+    <!-- Score global -->
+    <div class="section-title">Répartition globale</div>
+    <div class="equilibre-card">
+      <div class="eq-avatars">
+        <div class="eq-avatar-block">
+          <div class="eq-avatar">🧑</div>
+          <div class="eq-name">Sophie</div>
+          <div class="eq-score" style="color:var(--rose)">68%</div>
+          <div class="eq-tasks">12 tâches</div>
+        </div>
+        <div class="eq-middle">
+          <div class="eq-vs">VS</div>
+          <div class="eq-message">Déséquilibre détecté 😮‍💨</div>
+        </div>
+        <div class="eq-avatar-block">
+          <div class="eq-avatar">🧑</div>
+          <div class="eq-name">Marc</div>
+          <div class="eq-score" style="color:var(--sage)">32%</div>
+          <div class="eq-tasks">5 tâches</div>
+        </div>
+      </div>
+
+      <!-- Barre visuelle -->
+      <div class="eq-bar-wrap">
+        <div class="eq-bar">
+          <div class="eq-bar-sophie" style="width:68%"></div>
+          <div class="eq-bar-marc" style="width:32%"></div>
+        </div>
+        <div class="eq-bar-labels">
+          <span style="color:var(--rose)">Sophie 68%</span>
+          <span style="color:var(--sage)">Marc 32%</span>
+        </div>
+      </div>
+
+      <div class="eq-tip">
+        💡 Si Marc prenait 3 tâches de plus, vous seriez à l'équilibre
+      </div>
+    </div>
+
+    <!-- Par catégorie -->
+    <div class="section-title">Par catégorie</div>
+    <div class="settings-card" style="padding: 4px 16px;">
+      <div class="cat-eq-row">
+        <span class="cat-eq-icon">🛒</span>
+        <div class="cat-eq-info">
+          <div class="cat-eq-name">Courses & Repas</div>
+          <div class="eq-mini-bar">
+            <div class="eq-mini-sophie" style="width:80%"></div>
+            <div class="eq-mini-marc" style="width:20%"></div>
+          </div>
+        </div>
+        <div class="cat-eq-split">
+          <span style="color:var(--rose)">80%</span>
+          <span style="color:var(--muted)"> / </span>
+          <span style="color:var(--sage)">20%</span>
+        </div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="cat-eq-row">
+        <span class="cat-eq-icon">👶</span>
+        <div class="cat-eq-info">
+          <div class="cat-eq-name">Enfants</div>
+          <div class="eq-mini-bar">
+            <div class="eq-mini-sophie" style="width:50%"></div>
+            <div class="eq-mini-marc" style="width:50%"></div>
+          </div>
+        </div>
+        <div class="cat-eq-split">
+          <span style="color:var(--rose)">50%</span>
+          <span style="color:var(--muted)"> / </span>
+          <span style="color:var(--sage)">50%</span>
+        </div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="cat-eq-row">
+        <span class="cat-eq-icon">🏠</span>
+        <div class="cat-eq-info">
+          <div class="cat-eq-name">Maison</div>
+          <div class="eq-mini-bar">
+            <div class="eq-mini-sophie" style="width:30%"></div>
+            <div class="eq-mini-marc" style="width:70%"></div>
+          </div>
+        </div>
+        <div class="cat-eq-split">
+          <span style="color:var(--rose)">30%</span>
+          <span style="color:var(--muted)"> / </span>
+          <span style="color:var(--sage)">70%</span>
+        </div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="cat-eq-row">
+        <span class="cat-eq-icon">💰</span>
+        <div class="cat-eq-info">
+          <div class="cat-eq-name">Factures & Admin</div>
+          <div class="eq-mini-bar">
+            <div class="eq-mini-sophie" style="width:60%"></div>
+            <div class="eq-mini-marc" style="width:40%"></div>
+          </div>
+        </div>
+        <div class="cat-eq-split">
+          <span style="color:var(--rose)">60%</span>
+          <span style="color:var(--muted)"> / </span>
+          <span style="color:var(--sage)">40%</span>
+        </div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="cat-eq-row">
+        <span class="cat-eq-icon">🔧</span>
+        <div class="cat-eq-info">
+          <div class="cat-eq-name">Divers</div>
+          <div class="eq-mini-bar">
+            <div class="eq-mini-sophie" style="width:100%"></div>
+            <div class="eq-mini-marc" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="cat-eq-split">
+          <span style="color:var(--rose)">100%</span>
+          <span style="color:var(--muted)"> / </span>
+          <span style="color:var(--sage)">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Évolution -->
+    <div class="section-title">Évolution sur 4 semaines</div>
+    <div class="settings-card" style="padding: 16px;">
+      <div class="chart-wrap">
+        <div class="chart-bars">
+          <div class="chart-week">
+            <div class="chart-col-wrap">
+              <div class="chart-bar-s" style="height:75%"></div>
+              <div class="chart-bar-m" style="height:25%"></div>
+            </div>
+            <div class="chart-label">S-4</div>
+          </div>
+          <div class="chart-week">
+            <div class="chart-col-wrap">
+              <div class="chart-bar-s" style="height:70%"></div>
+              <div class="chart-bar-m" style="height:30%"></div>
+            </div>
+            <div class="chart-label">S-3</div>
+          </div>
+          <div class="chart-week">
+            <div class="chart-col-wrap">
+              <div class="chart-bar-s" style="height:72%"></div>
+              <div class="chart-bar-m" style="height:28%"></div>
+            </div>
+            <div class="chart-label">S-2</div>
+          </div>
+          <div class="chart-week">
+            <div class="chart-col-wrap">
+              <div class="chart-bar-s" style="height:68%"></div>
+              <div class="chart-bar-m" style="height:32%"></div>
+            </div>
+            <div class="chart-label">Cette sem.</div>
+          </div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--rose)"></div> Sophie</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--sage)"></div> Marc</div>
+        </div>
+      </div>
+      <div class="eq-tip" style="margin-top:8px">📈 Marc a pris 4% de plus cette semaine — bonne direction !</div>
+    </div>
+
+    <!-- Suggestion IA -->
+    <div class="section-title">Suggestion de rééquilibrage</div>
+    <div class="ia-suggest-card">
+      <div class="ia-icon">🧠</div>
+      <div class="ia-text">
+        <div class="ia-title">3 tâches à redistribuer à Marc</div>
+        <div class="ia-sub">Pour atteindre 55% / 45% cette semaine</div>
+      </div>
+    </div>
+    <div class="suggest-list">
+      <div class="suggest-task" onclick="assignToMarc(this)">
+        <div class="suggest-info">
+          <div class="suggest-title">🛒 Commander eau pétillante</div>
+          <div class="suggest-meta">Courses · Pas urgent</div>
+        </div>
+        <button class="suggest-btn">Donner à Marc →</button>
+      </div>
+      <div class="suggest-task" onclick="assignToMarc(this)">
+        <div class="suggest-info">
+          <div class="suggest-title">💰 Payer assurance voiture</div>
+          <div class="suggest-meta">Factures · Dans 3 jours</div>
+        </div>
+        <button class="suggest-btn">Donner à Marc →</button>
+      </div>
+      <div class="suggest-task" onclick="assignToMarc(this)">
+        <div class="suggest-info">
+          <div class="suggest-title">🔧 Contacter voisin pour le mur</div>
+          <div class="suggest-meta">Divers · Normal</div>
+        </div>
+        <button class="suggest-btn">Donner à Marc →</button>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="goTo('dashboard')">
+      <span class="nav-icon">🏡</span>
+      <span class="nav-label">Accueil</span>
+    </div>
+    <div class="nav-item" onclick="goTo('dashboard')">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Tâches</span>
+    </div>
+    <div class="nav-item" onclick="goTo('notifs')">
+      <span class="nav-icon">🔔</span>
+      <span class="nav-label">Notifs</span>
+    </div>
+    <div class="nav-item active">
+      <span class="nav-icon">⚖️</span>
+      <span class="nav-label">Équilibre</span>
+    </div>
+  </nav>
+</div>
+
+    <div class="nav-item active">
+      <span class="nav-icon">⚖️</span>
+      <span class="nav-label">Équilibre</span>
+    </div>
+  </nav>
+</div>
+
+<!-- ═══════════════════ ENFANTS ═══════════════════ -->
+<div id="screen-enfants" class="screen">
+  <div class="top-bar">
+    <div class="top-greeting">Mes <span>Enfants</span> 👶</div>
+    <div class="top-sub">Tout pour eux, rien d'oublié</div>
+  </div>
+
+  <div class="dashboard-body">
+
+    <!-- Sélecteur enfants -->
+    <div class="enfants-selector" id="enfants-selector">
+      <div class="enfant-tab active" onclick="selectEnfant(this, 0)">
+        <div class="enfant-tab-avatar">👧</div>
+        <div class="enfant-tab-name">Emma</div>
+      </div>
+      <div class="enfant-tab" onclick="selectEnfant(this, 1)">
+        <div class="enfant-tab-avatar">👦</div>
+        <div class="enfant-tab-name">Lucas</div>
+      </div>
+      <div class="enfant-tab add-enfant-tab" onclick="openAddEnfant()">
+        <div class="enfant-tab-avatar">＋</div>
+        <div class="enfant-tab-name">Ajouter</div>
+      </div>
+    </div>
+
+    <!-- Contenu enfant actif -->
+    <div id="enfant-content"></div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="goTo('dashboard')"><span class="nav-icon">🏡</span><span class="nav-label">Accueil</span></div>
+    <div class="nav-item" onclick="goTo('courses')"><span class="nav-icon">🛒</span><span class="nav-label">Courses</span></div>
+    <div class="nav-item" onclick="goTo('equilibre')"><span class="nav-icon">⚖️</span><span class="nav-label">Équilibre</span></div>
+    <div class="nav-item" onclick="goTo('couple')"><span class="nav-icon">👥</span><span class="nav-label">Couple</span></div>
+  </nav>
+  <button class="fab" onclick="openModal()">+</button>
+</div>
+
+<!-- Modal ajouter enfant -->
+<div class="modal-overlay" id="add-enfant-modal" onclick="closeAddEnfant()">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="font-size:20px;margin-bottom:20px">Ajouter un enfant</div>
+
+    <div class="form-group">
+      <label class="form-label">Prénom</label>
+      <input class="form-input" id="new-enfant-name" placeholder="Ex: Léa, Tom…">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Avatar</label>
+      <div class="emoji-picker-row">
+        <div class="emoji-pick selected" onclick="pickEnfantEmoji(this)">👧</div>
+        <div class="emoji-pick" onclick="pickEnfantEmoji(this)">👦</div>
+        <div class="emoji-pick" onclick="pickEnfantEmoji(this)">🧒</div>
+        <div class="emoji-pick" onclick="pickEnfantEmoji(this)">👧🏽</div>
+        <div class="emoji-pick" onclick="pickEnfantEmoji(this)">👦🏽</div>
+        <div class="emoji-pick" onclick="pickEnfantEmoji(this)">🧒🏽</div>
+        <div class="emoji-pick" onclick="pickEnfantEmoji(this)">👧🏿</div>
+        <div class="emoji-pick" onclick="pickEnfantEmoji(this)">👦🏿</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Âge</label>
+      <input class="form-input" id="new-enfant-age" placeholder="Ex: 7 ans" type="text">
+    </div>
+
+    <button class="btn-submit" onclick="addEnfant()">Ajouter ✓</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ COUPLE ═══════════════════ -->
+<div id="screen-couple" class="screen">
+  <div class="top-bar">
+    <div class="top-greeting">Notre <span>Couple</span> 👫</div>
+    <div class="top-sub">Connectés depuis 12 jours</div>
+  </div>
+
+  <div class="dashboard-body">
+
+    <!-- Profils -->
+    <div class="section-title">Nos profils</div>
+    <div class="couple-profils">
+      <div class="profil-card moi-card">
+        <div class="profil-avatar">🧑</div>
+        <div class="profil-name">Sophie</div>
+        <div class="profil-role">Administratrice</div>
+        <div class="profil-stats">12 tâches · 71% de charge</div>
+      </div>
+      <div class="profil-coeur">💛</div>
+      <div class="profil-card lui-card">
+        <div class="profil-avatar">🧑</div>
+        <div class="profil-name">Marc</div>
+        <div class="profil-role">Partenaire</div>
+        <div class="profil-stats">5 tâches · 29% de charge</div>
+      </div>
+    </div>
+
+    <!-- Inviter -->
+    <div class="section-title">Inviter mon partenaire</div>
+    <div class="invite-card">
+      <div class="invite-icon">📲</div>
+      <div class="invite-text">
+        <div class="invite-title">Marc n'a pas encore l'appli</div>
+        <div class="invite-sub">Envoie-lui une invitation pour qu'il reçoive ses notifications</div>
+      </div>
+    </div>
+    <div class="invite-actions">
+      <button class="invite-btn whatsapp" onclick="showToast('📱 Lien copié ! Colle-le dans WhatsApp')">
+        <span>💬</span> Envoyer via WhatsApp
+      </button>
+      <button class="invite-btn sms" onclick="showToast('📱 Ouverture SMS…')">
+        <span>✉️</span> Envoyer par SMS
+      </button>
+      <button class="invite-btn copy" onclick="showToast('🔗 Lien copié !')">
+        <span>🔗</span> Copier le lien
+      </button>
+    </div>
+
+    <!-- Code d'invitation -->
+    <div class="code-invite">
+      <div class="code-label">Code d'invitation</div>
+      <div class="code-value">MDM-4829</div>
+      <div class="code-sub">Marc entre ce code à son inscription</div>
+    </div>
+
+    <!-- Paramètres du couple -->
+    <div class="section-title">Paramètres du couple</div>
+    <div class="settings-card">
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">Tableau d'équilibre visible</div>
+          <div class="setting-sub">Marc peut voir la répartition des tâches</div>
+        </div>
+        <div class="toggle active" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">Suggestions de rééquilibrage</div>
+          <div class="setting-sub">L'IA propose des transferts de tâches</div>
+        </div>
+        <div class="toggle active" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="setting-divider"></div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">Résumé hebdomadaire</div>
+          <div class="setting-sub">Bilan envoyé chaque dimanche soir</div>
+        </div>
+        <div class="toggle active" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+      </div>
+    </div>
+
+    <!-- Abonnement -->
+    <div class="section-title">Abonnement</div>
+    <div class="abonnement-card">
+      <div class="abo-header">
+        <div>
+          <div class="abo-plan">✨ Version gratuite</div>
+          <div class="abo-sub">1 mois d'essai · 18 jours restants</div>
+        </div>
+        <div class="abo-badge">Essai</div>
+      </div>
+      <div class="abo-features">
+        <div class="abo-feat included">✓ Tâches illimitées</div>
+        <div class="abo-feat included">✓ Listes de courses</div>
+        <div class="abo-feat included">✓ Notifications</div>
+        <div class="abo-feat included">✓ Cartes de fidélité</div>
+        <div class="abo-feat locked">🔒 Équilibre & suggestions IA</div>
+        <div class="abo-feat locked">🔒 Section Enfants avancée</div>
+        <div class="abo-feat locked">🔒 Résumé hebdomadaire</div>
+      </div>
+      <button class="btn-submit" style="margin-top:16px" onclick="showToast('🚀 Bientôt disponible !')">
+        Passer à Premium — 4,99€/mois
+      </button>
+      <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">ou 39,99€/an · Résiliable à tout moment</div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="goTo('dashboard')"><span class="nav-icon">🏡</span><span class="nav-label">Accueil</span></div>
+    <div class="nav-item" onclick="goTo('courses')"><span class="nav-icon">🛒</span><span class="nav-label">Courses</span></div>
+    <div class="nav-item" onclick="goTo('equilibre')"><span class="nav-icon">⚖️</span><span class="nav-label">Équilibre</span></div>
+    <div class="nav-item active" onclick="goTo('couple')"><span class="nav-icon">👥</span><span class="nav-label">Couple</span></div>
+  </nav>
+</div>
+
+<!-- ═══════════════════ MODAL NOUVELLE TÂCHE ═══════════════════ -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+
+    <!-- Étape 1 : Catégorie -->
+    <div class="modal-step active-modal-step" id="mstep-1">
+      <div class="modal-title">C'est dans quelle <span style="font-style:italic;color:var(--rose)">catégorie ?</span></div>
+      <div class="modal-step-indicator"><div class="mstep-dot active"></div><div class="mstep-dot"></div><div class="mstep-dot"></div></div>
+      <div class="cat-grid-modal">
+        <div class="cat-modal-btn" onclick="selectModalCat(this,'courses','🛒','Courses & Repas')">
+          <span class="cat-modal-icon">🛒</span>
+          <span class="cat-modal-name">Courses & Repas</span>
+        </div>
+        <div class="cat-modal-btn" onclick="selectModalCat(this,'factures','💰','Factures & Admin')">
+          <span class="cat-modal-icon">💰</span>
+          <span class="cat-modal-name">Factures & Admin</span>
+        </div>
+        <div class="cat-modal-btn" onclick="selectModalCat(this,'enfants','👶','Enfants')">
+          <span class="cat-modal-icon">👶</span>
+          <span class="cat-modal-name">Enfants</span>
+        </div>
+        <div class="cat-modal-btn" onclick="selectModalCat(this,'maison','🏠','Maison')">
+          <span class="cat-modal-icon">🏠</span>
+          <span class="cat-modal-name">Maison</span>
+        </div>
+        <div class="cat-modal-btn" onclick="selectModalCat(this,'voiture','🚗','Voiture')">
+          <span class="cat-modal-icon">🚗</span>
+          <span class="cat-modal-name">Voiture</span>
+        </div>
+        <div class="cat-modal-btn" onclick="selectModalCat(this,'social','❤️','Famille & Social')">
+          <span class="cat-modal-icon">❤️</span>
+          <span class="cat-modal-name">Famille & Social</span>
+        </div>
+        <div class="cat-modal-btn full-width" onclick="selectModalCat(this,'divers','🔧','Divers')">
+          <span class="cat-modal-icon">🔧</span>
+          <span class="cat-modal-name">Divers — ça rentre dans aucune case</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Étape 2 : Description + Qui -->
+    <div class="modal-step" id="mstep-2">
+      <div class="modal-step-indicator"><div class="mstep-dot done"></div><div class="mstep-dot active"></div><div class="mstep-dot"></div></div>
+      <div class="modal-cat-badge" id="modal-cat-badge">🛒 Courses & Repas</div>
+      <div class="modal-title" style="font-size:18px;margin-bottom:16px">Décris la tâche</div>
+
+      <div class="form-group">
+        <input class="form-input" id="task-desc" placeholder="Ex: Acheter du PQ, appeler le médecin…" type="text">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Pour qui ?</label>
+        <div class="who-grid">
+          <div class="who-btn" onclick="selectWho(this,'moi')">
+            <div class="who-avatar" id="modal-avatar-moi">🧑</div>
+            <div class="who-name">Moi</div>
+          </div>
+          <div class="who-btn" onclick="selectWho(this,'partenaire')">
+            <div class="who-avatar" id="modal-avatar-part">🧑</div>
+            <div class="who-name" id="modal-name-part">Marc</div>
+          </div>
+          <div class="who-btn" onclick="selectWho(this,'deux')">
+            <div class="who-avatar">👫</div>
+            <div class="who-name">Tous les deux</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-nav-row">
+        <button class="btn-back-modal" onclick="goModalStep(1)">← Retour</button>
+        <button class="btn-next-modal" onclick="goModalStep(3)">Suivant →</button>
+      </div>
+    </div>
+
+    <!-- Étape 3 : Urgence + Récurrence -->
+    <div class="modal-step" id="mstep-3">
+      <div class="modal-step-indicator"><div class="mstep-dot done"></div><div class="mstep-dot done"></div><div class="mstep-dot active"></div></div>
+      <div class="modal-title" style="font-size:18px;margin-bottom:16px">Urgence & récurrence</div>
+
+      <div class="form-group">
+        <label class="form-label">Niveau d'urgence</label>
+        <div class="urgency-grid">
+          <div class="urgency-btn urgent" onclick="selectUrgency(this,'high')">
+            <div class="urg-dot" style="background:var(--urgent)"></div>
+            <div>
+              <div class="urg-label">Urgent</div>
+              <div class="urg-sub">Notif veille + jour J + relance</div>
+            </div>
+          </div>
+          <div class="urgency-btn normal" onclick="selectUrgency(this,'medium')">
+            <div class="urg-dot" style="background:#E8A84A"></div>
+            <div>
+              <div class="urg-label">Normal</div>
+              <div class="urg-sub">Notif tous les 2 jours</div>
+            </div>
+          </div>
+          <div class="urgency-btn low" onclick="selectUrgency(this,'low')">
+            <div class="urg-dot" style="background:var(--sage)"></div>
+            <div>
+              <div class="urg-label">Pas pressé</div>
+              <div class="urg-sub">Rappel doux 1 fois/semaine</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Récurrence</label>
+        <div class="recur-grid">
+          <div class="recur-btn" onclick="selectRecur(this,'once')">
+            <div class="recur-icon">1️⃣</div>
+            <div class="recur-label">Une fois</div>
+          </div>
+          <div class="recur-btn" onclick="selectRecur(this,'weekly')">
+            <div class="recur-icon">📅</div>
+            <div class="recur-label">Chaque semaine</div>
+          </div>
+          <div class="recur-btn" onclick="selectRecur(this,'biweekly')">
+            <div class="recur-icon">🔁</div>
+            <div class="recur-label">1 sem / 2</div>
+          </div>
+          <div class="recur-btn" onclick="selectRecur(this,'monthly')">
+            <div class="recur-icon">🗓️</div>
+            <div class="recur-label">Chaque mois</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Résumé avant validation -->
+      <div class="task-summary" id="task-summary">
+        <div class="summary-row"><span class="sum-label">Tâche</span><span class="sum-val" id="sum-desc">—</span></div>
+        <div class="summary-row"><span class="sum-label">Catégorie</span><span class="sum-val" id="sum-cat">—</span></div>
+        <div class="summary-row"><span class="sum-label">Pour</span><span class="sum-val" id="sum-who">—</span></div>
+        <div class="summary-row"><span class="sum-label">Urgence</span><span class="sum-val" id="sum-urg">—</span></div>
+        <div class="summary-row"><span class="sum-label">Récurrence</span><span class="sum-val" id="sum-recur">—</span></div>
+      </div>
+
+      <div class="modal-nav-row">
+        <button class="btn-back-modal" onclick="goModalStep(2)">← Retour</button>
+        <button class="btn-submit" style="flex:1" onclick="submitTask()">Ajouter ✓</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════ COURSES & REPAS ═══════════════════ -->
+<div id="screen-courses" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goTo('dashboard')" style="margin-bottom:12px">←</button>
+    <div class="top-greeting">🛒 Courses <span>& Repas</span></div>
+    <div class="top-sub">Partagé avec Marc · Mis à jour à l'instant</div>
+  </div>
+
+  <div class="dashboard-body">
+
+    <!-- 3 onglets -->
+    <div class="courses-tabs">
+      <div class="ctab active" onclick="switchTab(this,'tab-courses')">🛒 Courses</div>
+      <div class="ctab" onclick="switchTab(this,'tab-repas')">🍽️ Repas</div>
+      <div class="ctab" onclick="switchTab(this,'tab-cartes')">💳 Cartes</div>
+    </div>
+
+    <!-- ── ONGLET COURSES ── -->
+    <div id="tab-courses" class="ctab-content active-tab">
+
+      <!-- Header listes magasins -->
+      <div class="magasins-header">
+        <div class="section-title" style="margin:0">Mes listes</div>
+        <button class="add-liste-btn" onclick="openAddListe()">+ Nouvelle liste</button>
+      </div>
+
+      <!-- Listes par magasin -->
+      <div class="magasins-list" id="magasins-list">
+        <div class="magasin-card" onclick="openMagasin('leclerc')">
+          <div class="magasin-color" style="background:#0052A5"></div>
+          <div class="magasin-emoji">🟦</div>
+          <div class="magasin-info">
+            <div class="magasin-name">Leclerc</div>
+            <div class="magasin-count">3 articles</div>
+          </div>
+          <div class="magasin-arrow">›</div>
+        </div>
+        <div class="magasin-card" onclick="openMagasin('lidl')">
+          <div class="magasin-color" style="background:#FFD700"></div>
+          <div class="magasin-emoji">🟡</div>
+          <div class="magasin-info">
+            <div class="magasin-name">Lidl</div>
+            <div class="magasin-count">2 articles</div>
+          </div>
+          <div class="magasin-arrow">›</div>
+        </div>
+        <div class="magasin-card" onclick="openMagasin('auchan')">
+          <div class="magasin-color" style="background:#E2001A"></div>
+          <div class="magasin-emoji">🟠</div>
+          <div class="magasin-info">
+            <div class="magasin-name">Auchan</div>
+            <div class="magasin-count">1 article</div>
+          </div>
+          <div class="magasin-arrow">›</div>
+        </div>
+        <div class="magasin-card" onclick="openMagasin('autre')">
+          <div class="magasin-color" style="background:var(--muted)"></div>
+          <div class="magasin-emoji">🔧</div>
+          <div class="magasin-info">
+            <div class="magasin-name">Autre</div>
+            <div class="magasin-count">1 article</div>
+          </div>
+          <div class="magasin-arrow">›</div>
+        </div>
+      </div>
+
+      <!-- Détail magasin (caché par défaut) -->
+      <div class="magasin-detail" id="magasin-detail" style="display:none">
+        <div class="magasin-detail-header">
+          <button class="btn-back-modal" onclick="closeMagasin()" style="border-radius:50%;width:36px;height:36px;padding:0;display:flex;align-items:center;justify-content:center">←</button>
+          <div class="magasin-detail-title" id="magasin-detail-title">Leclerc</div>
+          <div style="width:36px"></div>
+        </div>
+        <div class="courses-list" id="magasin-items-list"></div>
+        <div class="add-course-row" style="margin-top:8px; flex-direction:column; gap:8px;">
+          <div style="display:flex;gap:8px;width:100%">
+            <input class="form-input" id="new-magasin-article" placeholder="Ajouter un article…" style="flex:1" oninput="showSuggestions(this.value)" onkeydown="if(event.key==='Enter')addMagasinArticle()" autocomplete="off">
+            <button class="add-course-btn" onclick="addMagasinArticle()">+</button>
+          </div>
+          <div id="article-suggestions" class="suggestions-list" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ONGLET REPAS ── -->
+    <div id="tab-repas" class="ctab-content">
+      <div class="section-title">Combien de temps ce soir ?</div>
+      <div class="temps-row">
+        <div class="temps-btn active-temps" onclick="selectTemps(this,'rapide')">⚡ 15 min</div>
+        <div class="temps-btn" onclick="selectTemps(this,'normal')">🕐 30 min</div>
+        <div class="temps-btn" onclick="selectTemps(this,'slow')">👨‍🍳 1h+</div>
+      </div>
+
+      <div class="section-title">Idées pour ce soir</div>
+      <div id="repas-list" class="repas-list">
+        <div class="repas-card" onclick="selectRepas(this)">
+          <div class="repas-emoji">🥗</div>
+          <div class="repas-info">
+            <div class="repas-name">Salade niçoise</div>
+            <div class="repas-meta">⚡ 15 min · Sans cuisson · 4 pers.</div>
+          </div>
+          <div class="repas-assign-btn">Planifier</div>
+        </div>
+        <div class="repas-card" onclick="selectRepas(this)">
+          <div class="repas-emoji">🍳</div>
+          <div class="repas-info">
+            <div class="repas-name">Omelette aux légumes</div>
+            <div class="repas-meta">⚡ 10 min · Facile · 4 pers.</div>
+          </div>
+          <div class="repas-assign-btn">Planifier</div>
+        </div>
+        <div class="repas-card" onclick="selectRepas(this)">
+          <div class="repas-emoji">🥪</div>
+          <div class="repas-info">
+            <div class="repas-name">Wraps au poulet</div>
+            <div class="repas-meta">⚡ 15 min · Froid · 4 pers.</div>
+          </div>
+          <div class="repas-assign-btn">Planifier</div>
+        </div>
+      </div>
+
+      <div class="section-title">Menu de la semaine</div>
+      <div class="menu-semaine">
+        <div class="menu-jour"><div class="jour-label">Lun</div><div class="jour-repas">Pâtes carbonara</div><div class="jour-qui">Marc 👨</div></div>
+        <div class="menu-jour"><div class="jour-label">Mar</div><div class="jour-repas">Poulet rôti</div><div class="jour-qui">Moi 👩</div></div>
+        <div class="menu-jour today-menu"><div class="jour-label">Mer ✦</div><div class="jour-repas">À définir…</div><div class="jour-qui">—</div></div>
+        <div class="menu-jour"><div class="jour-label">Jeu</div><div class="jour-repas">Soupe + pain</div><div class="jour-qui">Marc 👨</div></div>
+        <div class="menu-jour"><div class="jour-label">Ven</div><div class="jour-repas">Pizza maison</div><div class="jour-qui">Tous 👫</div></div>
+        <div class="menu-jour"><div class="jour-label">Sam</div><div class="jour-repas">Barbecue</div><div class="jour-qui">Marc 👨</div></div>
+        <div class="menu-jour"><div class="jour-label">Dim</div><div class="jour-repas">Blanquette</div><div class="jour-qui">Moi 👩</div></div>
+      </div>
+    </div>
+
+    <!-- ── ONGLET CARTES ── -->
+    <div id="tab-cartes" class="ctab-content">
+      <div class="cartes-intro">💡 Les deux partenaires ont accès à toutes les cartes — fini le "j'ai pas ta carte !"</div>
+
+      <div class="section-title">Mes cartes</div>
+      <div class="cartes-list">
+        <div class="carte-item" onclick="showCarte('Leclerc','5 412 387 291 043','E.Leclerc','#0052A5')">
+          <div class="carte-logo" style="background:#0052A5">E.Lec</div>
+          <div class="carte-info"><div class="carte-name">E.Leclerc</div><div class="carte-num">•••• •••• 1043</div></div>
+          <div class="carte-arrow">›</div>
+        </div>
+        <div class="carte-item" onclick="showCarte('Carrefour','7 823 901 234 567','Carrefour','#004A97')">
+          <div class="carte-logo" style="background:#004A97">Carf</div>
+          <div class="carte-info"><div class="carte-name">Carrefour</div><div class="carte-num">•••• •••• 4567</div></div>
+          <div class="carte-arrow">›</div>
+        </div>
+        <div class="carte-item" onclick="showCarte('Sephora','1 029 384 756 192','Sephora','#1B1B1B')">
+          <div class="carte-logo" style="background:#1B1B1B">Seph</div>
+          <div class="carte-info"><div class="carte-name">Sephora</div><div class="carte-num">•••• •••• 6192</div></div>
+          <div class="carte-arrow">›</div>
+        </div>
+        <div class="carte-item" onclick="showCarte('FNAC','3 847 201 938 475','Fnac','#E4A000')">
+          <div class="carte-logo" style="background:#E4A000">Fnac</div>
+          <div class="carte-info"><div class="carte-name">Fnac</div><div class="carte-num">•••• •••• 8475</div></div>
+          <div class="carte-arrow">›</div>
+        </div>
+      </div>
+
+      <button class="btn-submit" style="margin-top:16px" onclick="showToast('📷 Scan de carte — disponible dans la vraie appli !')">+ Ajouter une carte</button>
+    </div>
+
+  </div>
+
+  <!-- Modal carte -->
+  <div class="carte-modal" id="carte-modal" onclick="closeCarte()">
+    <div class="carte-display" onclick="event.stopPropagation()">
+      <div class="carte-display-inner" id="carte-display-inner">
+        <div class="carte-display-name" id="carte-display-name">E.Leclerc</div>
+        <div class="carte-display-num" id="carte-display-num">5 412 387 291 043</div>
+      </div>
+
+      <!-- Tabs code-barre / QR / Photo -->
+      <div class="code-tabs">
+        <div class="code-tab active" onclick="switchCodeTab(this,'barcode-view')">▮▮ Code-barre</div>
+        <div class="code-tab" onclick="switchCodeTab(this,'qr-view')">⬛ QR Code</div>
+        <div class="code-tab" onclick="switchCodeTab(this,'photo-view')">📷 Photo</div>
+      </div>
+
+      <div id="barcode-view" class="code-view active-code-view">
+        <div class="carte-barcode">
+          <div class="barcode-lines"></div>
+          <div class="barcode-num" id="barcode-num">5 412 387 291 043</div>
+        </div>
+        <button class="save-carte-btn" style="width:100%;margin-top:10px" onclick="saveCarteAsImage()">🖼️ Enregistrer en image</button>
+      </div>
+
+      <div id="qr-view" class="code-view">
+        <div class="qr-container">
+          <canvas id="qr-canvas" width="160" height="160"></canvas>
+        </div>
+        <button class="save-carte-btn" style="width:100%;margin-top:10px" onclick="saveCarteAsImage()">🖼️ Enregistrer en image</button>
+      </div>
+
+      <div id="photo-view" class="code-view">
+        <div id="photo-carte-empty" class="photo-carte-empty">
+          <div style="font-size:40px;margin-bottom:10px">📷</div>
+          <div style="font-size:14px;font-weight:500;color:var(--deep);margin-bottom:6px">Pas encore de photo</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Prends une photo de ta vraie carte physique</div>
+          <div style="display:flex;gap:8px">
+            <button class="save-carte-btn" style="flex:1" onclick="photoCartePhysique('camera')">📷 Appareil photo</button>
+            <button class="save-carte-btn secondary" style="flex:1" onclick="photoCartePhysique('gallery')">🖼️ Galerie</button>
+          </div>
+        </div>
+        <div id="photo-carte-filled" style="display:none">
+          <img id="carte-photo-img-tab" style="width:100%;border-radius:14px;object-fit:cover;max-height:200px;cursor:pointer" onclick="showPhotoZoom(this.src)">
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="save-carte-btn" style="flex:1" onclick="photoCartePhysique('camera')">📷 Changer</button>
+            <button class="save-carte-btn secondary" style="flex:1" onclick="saveCarteAsImage()">🖼️ Enregistrer</button>
+          </div>
+        </div>
+      </div>
+      <input type="file" id="carte-photo-input" accept="image/*" capture="environment" style="display:none" onchange="handleCartePhoto(event)">
+      <input type="file" id="carte-gallery-input" accept="image/*" style="display:none" onchange="handleCartePhoto(event)">
+
+      <button class="btn-submit" style="margin-top:12px;width:100%" onclick="closeCarte()">Fermer</button>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="goTo('dashboard')"><span class="nav-icon">🏡</span><span class="nav-label">Accueil</span></div>
+    <div class="nav-item active" onclick="goTo('courses')"><span class="nav-icon">🛒</span><span class="nav-label">Courses</span></div>
+    <div class="nav-item" onclick="goTo('equilibre')"><span class="nav-icon">⚖️</span><span class="nav-label">Équilibre</span></div>
+    <div class="nav-item" onclick="goTo('couple')"><span class="nav-icon">👥</span><span class="nav-label">Couple</span></div>
+  </nav>
+  <button class="fab" onclick="openModal()">+</button>
+</div>
+
+<!-- Modal nouvelle liste -->
+<div class="nouvelle-liste-modal" id="nouvelle-liste-modal" onclick="closeAddListe()">
+  <div class="nouvelle-liste-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="font-size:20px;margin-bottom:20px">Nouvelle liste magasin</div>
+
+    <div class="form-group">
+      <label class="form-label">Nom du magasin</label>
+      <input class="form-input" id="new-liste-name" placeholder="Ex: Monoprix, Intermarché…">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Emoji</label>
+      <div class="emoji-picker-row">
+        <div class="emoji-pick selected" onclick="pickListeEmoji(this)">🛒</div>
+        <div class="emoji-pick" onclick="pickListeEmoji(this)">🏪</div>
+        <div class="emoji-pick" onclick="pickListeEmoji(this)">🏬</div>
+        <div class="emoji-pick" onclick="pickListeEmoji(this)">🟢</div>
+        <div class="emoji-pick" onclick="pickListeEmoji(this)">🔴</div>
+        <div class="emoji-pick" onclick="pickListeEmoji(this)">🟡</div>
+        <div class="emoji-pick" onclick="pickListeEmoji(this)">🟣</div>
+        <div class="emoji-pick" onclick="pickListeEmoji(this)">🟠</div>
+        <div class="emoji-pick" onclick="pickListeEmoji(this)">🔵</div>
+      </div>
+    </div>
+
+    <button class="btn-submit" onclick="createListe()">Créer la liste ✓</button>
+  </div>
+</div>
+
+<!-- ── À SAISIR FAB (global, visible sur toutes les pages sauf home) ── -->
+<button class="saisir-fab" id="saisir-fab" onclick="openSaisir()">
+  🎯 À saisir <span class="saisir-count" id="saisir-count">0</span>
+</button>
+
+<!-- Modal À saisir -->
+<div class="saisir-modal" id="saisir-modal" onclick="closeSaisir()">
+  <div class="saisir-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="font-size:20px;margin-bottom:6px">🎯 À saisir</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px">Tâches libres — prenez ce que vous voulez !</div>
+
+    <div id="saisir-list"></div>
+
+    <div class="add-saisir-row">
+      <input class="form-input" id="new-saisir" placeholder="Ajouter une tâche libre…" style="flex:1">
+      <button class="add-course-btn" onclick="addSaisirTask()">+</button>
+    </div>
+  </div>
+</div>
+
+<!-- Photo zoom -->
+<div class="photo-zoom-overlay" id="photo-zoom" onclick="this.classList.remove('open')">
+  <img id="photo-zoom-img" src="" alt="Produit">
+</div>
+
+<!-- Input file caché pour photo -->
+<input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoCapture(event)">
+<input type="file" id="photo-gallery" accept="image/*" style="display:none" onchange="handlePhotoCapture(event)">
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const categories = {
+  courses: { icon: '🛒', name: 'Courses & Repas', tasks: [
+    { title: 'Acheter PQ + lessive', who: 'Moi', urgency: 'high', recur: 'Une fois' },
+    { title: 'Menu de la semaine', who: 'Moi', urgency: 'medium', recur: 'Chaque semaine' },
+    { title: 'Commander eau pétillante', who: 'Marc', urgency: 'low', recur: 'Une fois' },
+  ]},
+  factures: { icon: '💰', name: 'Factures & Admin', tasks: [
+    { title: 'Payer assurance voiture', who: 'Tous les deux', urgency: 'medium', recur: 'Une fois' },
+  ]},
+  enfants: { icon: '👶', name: 'Enfants', tasks: [
+    { title: 'Spectacle école Emma', who: 'Marc', urgency: 'high', recur: 'Une fois' },
+    { title: 'RDV pédiatre Lucas', who: 'Moi', urgency: 'medium', recur: 'Une fois' },
+  ]},
+  maison: { icon: '🏠', name: 'Maison', tasks: [
+    { title: 'Poubelle noire', who: 'Marc', urgency: 'low', recur: 'Chaque semaine' },
+    { title: 'Poubelle jaune', who: 'Marc', urgency: 'low', recur: '1 sem / 2' },
+  ]},
+  voiture: { icon: '🚗', name: 'Voiture', tasks: [] },
+  social: { icon: '❤️', name: 'Famille & Social', tasks: [] },
+  divers: { icon: '🔧', name: 'Divers', tasks: [
+    { title: 'Contacter voisin pour le mur', who: 'Marc', urgency: 'medium', recur: 'Une fois' },
+  ]},
+};
+
+let currentCat = null;
+
+function goTo(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('screen-' + screenId);
+  if (target) target.classList.add('active');
+  if (screenId === 'enfants') {
+    currentEnfantSection = 'agenda';
+    setTimeout(renderEnfantContent, 50);
+  }
+  setTimeout(updateSaisirFab, 100);
+  // Save last screen
+  try { localStorage.setItem('mdm_screen', screenId); } catch(e) {}
+}
+
+let avatar1 = '🧑', avatar2 = '🧑';
+
+function pickAvatar(profile, el) {
+  el.closest('.avatar-picker').querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  if (profile === 1) {
+    avatar1 = el.textContent;
+    document.getElementById('manage-emoji-1').textContent = avatar1;
+  } else {
+    avatar2 = el.textContent;
+    document.getElementById('manage-emoji-2').textContent = avatar2;
+  }
+}
+
+function goStep2() {
+  const n1 = document.getElementById('name-1').value.trim() || 'Moi';
+  const n2 = document.getElementById('name-2').value.trim() || 'Mon partenaire';
+  document.getElementById('manage-label-1').textContent = n1;
+  document.getElementById('manage-label-2').textContent = n2;
+  document.getElementById('manage-emoji-1').textContent = avatar1;
+  document.getElementById('manage-emoji-2').textContent = avatar2;
+  // Save to localStorage
+  try {
+    localStorage.setItem('mdm_name1', n1);
+    localStorage.setItem('mdm_name2', n2);
+    localStorage.setItem('mdm_avatar1', avatar1);
+    localStorage.setItem('mdm_avatar2', avatar2);
+  } catch(e) {}
+  document.getElementById('step-1').classList.remove('active-step');
+  document.getElementById('step-2').classList.add('active-step');
+}
+
+function goStep1() {
+  document.getElementById('step-2').classList.remove('active-step');
+  document.getElementById('step-1').classList.add('active-step');
+}
+
+function selectManage(el) {
+  document.querySelectorAll('.manage-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function openCategory(catId) {
+  if (catId === 'courses') { goTo('courses'); return; }
+  currentCat = catId;
+  const cat = categories[catId];
+  document.getElementById('cat-icon').textContent = cat.icon;
+  document.getElementById('cat-name').textContent = cat.name;
+
+  const body = document.getElementById('cat-body');
+  if (cat.tasks.length === 0) {
+    body.innerHTML = `<div class="empty-state"><div class="big">✨</div><p>Aucune tâche ici pour l'instant.<br>Profitez-en !</p></div>`;
+  } else {
+    const whoClass = { 'Moi': 'moi', 'Marc': 'lui', 'Tous les deux': 'deux' };
+    const urgDot = { high: 'high', medium: 'medium', low: 'low' };
+    body.innerHTML = `<div class="section-title" style="margin-top:16px">${cat.tasks.length} tâche${cat.tasks.length > 1 ? 's' : ''}</div><div class="urgent-list">` +
+      cat.tasks.map((t, i) => `
+        <div class="task-card" style="animation-delay:${i*0.07}s" onclick="completeTask(this)">
+          <div class="task-cat-dot" style="background:var(--rose)"></div>
+          <div class="task-info">
+            <div class="task-title">${t.title}</div>
+            <div class="task-meta">${cat.icon} ${cat.name} · ${t.recur}</div>
+          </div>
+          <span class="task-assignee ${whoClass[t.who] || 'moi'}">${t.who}</span>
+          <div class="urgency-dot ${urgDot[t.urgency]}"></div>
+        </div>
+      `).join('') + `</div>`;
+  }
+
+  goTo('category');
+}
+
+function completeTask(el) {
+  el.style.opacity = '0.4';
+  el.style.textDecoration = 'line-through';
+  showToast('✓ Tâche marquée comme faite !');
+  setTimeout(() => {
+    el.style.transition = 'all 0.4s';
+    el.style.transform = 'translateX(100px)';
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 400);
+  }, 800);
+}
+
+// ── MODAL MULTI-ÉTAPES ──
+let modalData = { cat: '', catIcon: '', catName: '', who: '', urgency: '', recur: '' };
+
+function openModal() {
+  modalData = { cat: '', catIcon: '', catName: '', who: '', urgency: '', recur: '' };
+  document.querySelectorAll('.cat-modal-btn, .who-btn, .urgency-btn, .recur-btn').forEach(e => e.classList.remove('selected'));
+  document.getElementById('task-desc').value = '';
+  goModalStep(1);
+  document.getElementById('modal').classList.add('open');
+}
+
+function goModalStep(n) {
+  document.querySelectorAll('.modal-step').forEach(s => s.classList.remove('active-modal-step'));
+  document.getElementById('mstep-' + n).classList.add('active-modal-step');
+  if (n === 3) updateSummary();
+}
+
+function selectModalCat(el, catId, icon, name) {
+  document.querySelectorAll('.cat-modal-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  modalData.cat = catId; modalData.catIcon = icon; modalData.catName = name;
+  document.getElementById('modal-cat-badge').textContent = icon + ' ' + name;
+  setTimeout(() => goModalStep(2), 220);
+}
+
+function selectWho(el, who) {
+  document.querySelectorAll('.who-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  modalData.who = who;
+}
+
+function selectUrgency(el, level) {
+  document.querySelectorAll('.urgency-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  modalData.urgency = level;
+  updateSummary();
+}
+
+function selectRecur(el, recur) {
+  document.querySelectorAll('.recur-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  modalData.recur = recur;
+  updateSummary();
+}
+
+function updateSummary() {
+  const desc = document.getElementById('task-desc').value || '—';
+  const urgLabels = { high: '🔴 Urgent', medium: '🟡 Normal', low: '🟢 Pas pressé' };
+  const recurLabels = { once: 'Une fois', weekly: 'Chaque semaine', biweekly: '1 sem / 2', monthly: 'Chaque mois' };
+  const whoLabels = { moi: 'Moi', partenaire: 'Marc', deux: 'Tous les deux' };
+  document.getElementById('sum-desc').textContent = desc;
+  document.getElementById('sum-cat').textContent = modalData.catIcon + ' ' + (modalData.catName || '—');
+  document.getElementById('sum-who').textContent = whoLabels[modalData.who] || '—';
+  document.getElementById('sum-urg').textContent = urgLabels[modalData.urgency] || '—';
+  document.getElementById('sum-recur').textContent = recurLabels[modalData.recur] || '—';
+}
+
+function submitTask() {
+  const desc = document.getElementById('task-desc').value.trim();
+  if (!desc) { showToast('⚠️ Décris la tâche d\'abord !'); return; }
+  if (!modalData.cat) { showToast('⚠️ Choisis une catégorie !'); return; }
+  closeModal();
+  showToast('🎉 Tâche ajoutée ! Notification envoyée. 🔔');
+}
+
+function assignToMarc(el) {
+  el.style.opacity = '0.4';
+  el.querySelector('.suggest-btn').textContent = '✓ Assigné !';
+  el.querySelector('.suggest-btn').style.background = 'var(--rose)';
+  showToast('✅ Tâche assignée à Marc — notif envoyée !');
+}
+
+// ── ENFANTS ──
+let selectedEnfantEmoji = '👧';
+let currentEnfantIndex = 0;
+let currentEnfantSection = 'agenda';
+
+const enfantsData = [
+  {
+    name: 'Emma', avatar: '👧', age: '8 ans',
+    agenda: [
+      { name: 'Spectacle de danse', date: 'Demain 18h', qui: 'lui', dot: '#C4715A' },
+      { name: 'Sortie scolaire zoo', date: 'Vendredi 8h', qui: 'moi', dot: '#7A9E8E' },
+      { name: 'Cours de piano', date: 'Mercredi 17h · Récurrent', qui: 'lui', dot: '#8B70B5' },
+      { name: 'RDV orthodontiste', date: '28 juin 14h', qui: 'moi', dot: '#C49A44' },
+    ],
+    sante: {
+      tailles: { vetements: '134 cm', chaussures: '33', poids: '27 kg', updated: 'Mars 2026' },
+      vaccins: [
+        { name: 'DTPolio rappel', date: 'Fait — Jan 2025', done: true },
+        { name: 'ROR rappel', date: 'Fait — Jan 2025', done: true },
+        { name: 'Prochain bilan', date: 'À planifier — 9 ans', done: false },
+      ],
+      medicaments: [
+        { name: 'Doliprane 250mg', dose: 'Si fièvre · max 4x/jour' },
+        { name: 'Aerius 0.5mg/ml', dose: 'Allergie printanière · 1 cuil/jour' },
+      ]
+    },
+    social: [
+      { name: 'Inès', avatar: '👧🏽', date: '15 juillet', countdown: '31 jours', soon: false },
+      { name: 'Zoé', avatar: '👧', date: '3 juillet', countdown: '19 jours', soon: false },
+      { name: 'Camille', avatar: '👧', date: '22 juin', countdown: '8 jours', soon: true },
+    ]
+  },
+  {
+    name: 'Lucas', avatar: '👦', age: '5 ans',
+    agenda: [
+      { name: 'Fête de l\'école', date: 'Samedi 10h', qui: 'moi', dot: '#C4715A' },
+      { name: 'Football entraînement', date: 'Jeudi 17h · Récurrent', qui: 'lui', dot: '#7A9E8E' },
+      { name: 'RDV pédiatre', date: '2 juillet 10h30', qui: 'moi', dot: '#C49A44' },
+    ],
+    sante: {
+      tailles: { vetements: '110 cm', chaussures: '27', poids: '18 kg', updated: 'Avril 2026' },
+      vaccins: [
+        { name: 'Pentavalent rappel', date: 'Fait — Sept 2024', done: true },
+        { name: 'ROR 2ème dose', date: 'Fait — Sept 2024', done: true },
+        { name: 'Rappel 6 ans', date: 'À planifier — 2027', done: false },
+      ],
+      medicaments: [
+        { name: 'Doliprane 150mg', dose: 'Si fièvre · max 4x/jour' },
+      ]
+    },
+    social: [
+      { name: 'Hugo', avatar: '👦🏽', date: '8 juillet', countdown: '24 jours', soon: false },
+      { name: 'Mathis', avatar: '👦', date: '19 juin', countdown: '5 jours', soon: true },
+    ]
+  }
+];
+
+function selectEnfant(el, index) {
+  document.querySelectorAll('.enfant-tab:not(.add-enfant-tab)').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentEnfantIndex = index;
+  currentEnfantSection = 'agenda';
+  renderEnfantContent();
+}
+
+function renderEnfantContent() {
+  const e = enfantsData[currentEnfantIndex];
+  const content = document.getElementById('enfant-content');
+
+  content.innerHTML = `
+    <div class="enfant-header-card">
+      <div class="enfant-big-avatar">${e.avatar}</div>
+      <div class="enfant-header-info">
+        <div class="enfant-header-name">${e.name}</div>
+        <div class="enfant-header-age">${e.age}</div>
+        <div class="enfant-header-stats">
+          <div class="enfant-stat">📅 ${e.agenda.length} événements</div>
+          <div class="enfant-stat">🎂 ${e.social.length} copains</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="enfant-sections">
+      <div class="enfant-section-btn ${currentEnfantSection==='agenda'?'active-section':''}" onclick="switchEnfantSection('agenda')">
+        <div class="enfant-section-icon">📅</div>
+        <div class="enfant-section-name">Agenda</div>
+        <div class="enfant-section-count">${e.agenda.length} événements</div>
+      </div>
+      <div class="enfant-section-btn ${currentEnfantSection==='sante'?'active-section':''}" onclick="switchEnfantSection('sante')">
+        <div class="enfant-section-icon">🏥</div>
+        <div class="enfant-section-name">Santé</div>
+        <div class="enfant-section-count">Vaccins · Tailles · Médicaments</div>
+      </div>
+      <div class="enfant-section-btn ${currentEnfantSection==='social'?'active-section':''}" onclick="switchEnfantSection('social')">
+        <div class="enfant-section-icon">🎂</div>
+        <div class="enfant-section-name">Vie sociale</div>
+        <div class="enfant-section-count">${e.social.length} copains</div>
+      </div>
+      <div class="enfant-section-btn ${currentEnfantSection==='docs'?'active-section':''}" onclick="switchEnfantSection('docs')">
+        <div class="enfant-section-icon">📄</div>
+        <div class="enfant-section-name">Documents</div>
+        <div class="enfant-section-count">Carnet de santé · Assurance</div>
+      </div>
+    </div>
+
+    <div class="enfant-detail" id="enfant-detail">
+      ${renderEnfantSection(e)}
+    </div>
+  `;
+}
+
+function switchEnfantSection(section) {
+  currentEnfantSection = section;
+  const e = enfantsData[currentEnfantIndex];
+  // Update active section button
+  document.querySelectorAll('.enfant-section-btn').forEach(b => {
+    b.classList.toggle('active-section', b.querySelector('.enfant-section-name').textContent ===
+      ({agenda:'Agenda', sante:'Santé', social:'Vie sociale', docs:'Documents'}[section]));
+  });
+  document.getElementById('enfant-detail').innerHTML = renderEnfantSection(e);
+}
+
+function renderEnfantSection(e) {
+  if (currentEnfantSection === 'agenda') {
+    return `
+      <div class="section-title">Événements à venir</div>
+      ${e.agenda.map(ev => `
+        <div class="enfant-event">
+          <div class="enfant-event-dot" style="background:${ev.dot}"></div>
+          <div class="enfant-event-info">
+            <div class="enfant-event-name">${ev.name}</div>
+            <div class="enfant-event-meta">${ev.date}</div>
+          </div>
+          <span class="enfant-event-qui ${ev.qui}">${ev.qui === 'moi' ? 'Moi' : 'Marc'}</span>
+        </div>
+      `).join('')}
+      <button class="btn-submit" style="margin-top:8px" onclick="showToast('➕ Ajouter un événement pour ${e.name}')">+ Ajouter un événement</button>
+    `;
+  }
+
+  if (currentEnfantSection === 'sante') {
+    return `
+      <div class="section-title">Tailles & poids</div>
+      <div class="tailles-grid">
+        <div class="taille-card"><div class="taille-icon">👕</div><div class="taille-label">Vêtements</div><div class="taille-val">${e.sante.tailles.vetements}</div><div class="taille-date">Mis à jour ${e.sante.tailles.updated}</div></div>
+        <div class="taille-card"><div class="taille-icon">👟</div><div class="taille-label">Chaussures</div><div class="taille-val">${e.sante.tailles.chaussures}</div><div class="taille-date">Mis à jour ${e.sante.tailles.updated}</div></div>
+        <div class="taille-card"><div class="taille-icon">⚖️</div><div class="taille-label">Poids</div><div class="taille-val">${e.sante.tailles.poids}</div><div class="taille-date">Mis à jour ${e.sante.tailles.updated}</div></div>
+        <div class="taille-card" onclick="showToast('✏️ Mettre à jour les tailles')" style="cursor:pointer;background:var(--warm);border:2px dashed var(--blush)"><div class="taille-icon">✏️</div><div class="taille-label" style="color:var(--rose)">Mettre à jour</div><div class="taille-val" style="font-size:13px;color:var(--muted)">Modifier</div></div>
+      </div>
+
+      <div class="section-title" style="margin-top:20px">Vaccins</div>
+      ${e.sante.vaccins.map(v => `
+        <div class="vaccin-row">
+          <div class="vaccin-status ${v.done ? 'done' : 'todo'}">${v.done ? '✓' : '!'}</div>
+          <div class="vaccin-info">
+            <div class="vaccin-name">${v.name}</div>
+            <div class="vaccin-date">${v.date}</div>
+          </div>
+        </div>
+      `).join('')}
+
+      <div class="section-title" style="margin-top:16px">Médicaments habituels</div>
+      ${e.sante.medicaments.map(m => `
+        <div class="vaccin-row">
+          <div class="vaccin-status done">💊</div>
+          <div class="vaccin-info">
+            <div class="vaccin-name">${m.name}</div>
+            <div class="vaccin-date">${m.dose}</div>
+          </div>
+        </div>
+      `).join('')}
+      <button class="btn-submit" style="margin-top:8px" onclick="showToast('➕ Ajouter un médicament')">+ Ajouter</button>
+    `;
+  }
+
+  if (currentEnfantSection === 'social') {
+    return `
+      <div class="section-title">Anniversaires des copains</div>
+      ${e.social.map(c => `
+        <div class="copain-row">
+          <div class="copain-avatar">${c.avatar}</div>
+          <div class="copain-info">
+            <div class="copain-name">${c.name}</div>
+            <div class="copain-date">🎂 ${c.date}</div>
+          </div>
+          <div class="copain-countdown ${c.soon ? 'soon' : 'ok'}">${c.countdown}</div>
+        </div>
+      `).join('')}
+      <button class="btn-submit" style="margin-top:8px" onclick="showToast('➕ Ajouter un copain')">+ Ajouter un copain</button>
+    `;
+  }
+
+  if (currentEnfantSection === 'docs') {
+    return `
+      <div class="section-title">Documents importants</div>
+      <div class="enfant-event" onclick="showToast('📄 Carnet de santé — bientôt !')">
+        <div class="enfant-event-dot" style="background:#7A9E8E"></div>
+        <div class="enfant-event-info"><div class="enfant-event-name">📗 Carnet de santé</div><div class="enfant-event-meta">Photo ou scan · Toujours à portée</div></div>
+        <span style="color:var(--muted);font-size:20px">›</span>
+      </div>
+      <div class="enfant-event" onclick="showToast('📄 Assurance — bientôt !')">
+        <div class="enfant-event-dot" style="background:#C49A44"></div>
+        <div class="enfant-event-info"><div class="enfant-event-name">🏥 Carte mutuelle</div><div class="enfant-event-meta">N° adhérent · Valide jusqu'au 31/12/2026</div></div>
+        <span style="color:var(--muted);font-size:20px">›</span>
+      </div>
+      <div class="enfant-event" onclick="showToast('📄 Documents scolaires — bientôt !')">
+        <div class="enfant-event-dot" style="background:#8B70B5"></div>
+        <div class="enfant-event-info"><div class="enfant-event-name">🏫 Documents scolaires</div><div class="enfant-event-meta">Autorisations · Photos · Règlement</div></div>
+        <span style="color:var(--muted);font-size:20px">›</span>
+      </div>
+      <button class="btn-submit" style="margin-top:8px" onclick="showToast('➕ Ajouter un document')">+ Ajouter un document</button>
+    `;
+  }
+}
+
+function openAddEnfant() {
+  document.getElementById('add-enfant-modal').classList.add('open');
+}
+
+function closeAddEnfant() {
+  document.getElementById('add-enfant-modal').classList.remove('open');
+}
+
+function pickEnfantEmoji(el) {
+  document.querySelectorAll('#add-enfant-modal .emoji-pick').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedEnfantEmoji = el.textContent;
+}
+
+function addEnfant() {
+  const name = document.getElementById('new-enfant-name').value.trim();
+  const age = document.getElementById('new-enfant-age').value.trim() || '?';
+  if (!name) { showToast('⚠️ Entre le prénom !'); return; }
+
+  enfantsData.push({
+    name, avatar: selectedEnfantEmoji, age,
+    agenda: [], sante: { tailles: { vetements: '—', chaussures: '—', poids: '—', updated: 'Non renseigné' }, vaccins: [], medicaments: [] }, social: []
+  });
+
+  // Add tab
+  const selector = document.getElementById('enfants-selector');
+  const addBtn = selector.querySelector('.add-enfant-tab');
+  const newTab = document.createElement('div');
+  newTab.className = 'enfant-tab';
+  newTab.onclick = function() { selectEnfant(this, enfantsData.length - 1); };
+  newTab.innerHTML = `<div class="enfant-tab-avatar">${selectedEnfantEmoji}</div><div class="enfant-tab-name">${name}</div>`;
+  selector.insertBefore(newTab, addBtn);
+
+  closeAddEnfant();
+  document.getElementById('new-enfant-name').value = '';
+  document.getElementById('new-enfant-age').value = '';
+  selectEnfant(newTab, enfantsData.length - 1);
+  showToast('🎉 ' + name + ' ajouté(e) !');
+}
+
+// Init enfants on screen load
+document.getElementById('screen-enfants').addEventListener('transitionend', () => {});
+
+// ── CATALOGUE PRODUITS (historique intelligent) ──
+let productCatalog = [
+  { name: 'Riz basmati Uncle Ben\'s', photo: null, magasin: 'Leclerc' },
+  { name: 'Sauce tomate Mutti', photo: null, magasin: 'Leclerc' },
+  { name: 'Lessive Ariel', photo: null, magasin: 'Lidl' },
+  { name: 'PQ Lotus', photo: null, magasin: 'Lidl' },
+  { name: 'Yaourts Danone', photo: null, magasin: 'Leclerc' },
+  { name: 'Eau pétillante Badoit', photo: null, magasin: 'Auchan' },
+  { name: 'Pain de mie Harry\'s', photo: null, magasin: 'Leclerc' },
+  { name: 'Nutella', photo: null, magasin: 'Leclerc' },
+  { name: 'Jus d\'orange Tropicana', photo: null, magasin: 'Auchan' },
+  { name: 'Camembert President', photo: null, magasin: 'Lidl' },
+];
+
+function showSuggestions(val) {
+  const box = document.getElementById('article-suggestions');
+  if (!val || val.length < 2) { box.style.display = 'none'; return; }
+  const matches = productCatalog.filter(p => p.name.toLowerCase().includes(val.toLowerCase()));
+  if (matches.length === 0) { box.style.display = 'none'; return; }
+  box.style.display = 'flex';
+  box.innerHTML = matches.slice(0, 4).map((p, i) => `
+    <div class="suggestion-item" onclick="selectSuggestion('${p.name.replace(/'/g,"\\'")}', ${productCatalog.indexOf(p)})">
+      ${p.photo
+        ? `<img src="${p.photo}" class="suggestion-photo">`
+        : `<div class="suggestion-photo-placeholder">🛒</div>`}
+      <div style="flex:1">
+        <div class="suggestion-name">${highlightMatch(p.name, val)}</div>
+        <div class="suggestion-mag">📍 ${p.magasin}</div>
+      </div>
+      <div class="suggestion-add">+</div>
+    </div>
+  `).join('');
+}
+
+function highlightMatch(text, query) {
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text;
+  return text.slice(0, idx) + '<strong style="color:var(--rose)">' + text.slice(idx, idx + query.length) + '</strong>' + text.slice(idx + query.length);
+}
+
+function selectSuggestion(name, catalogIdx) {
+  const input = document.getElementById('new-magasin-article');
+  input.value = name;
+  document.getElementById('article-suggestions').style.display = 'none';
+  // Auto-add with photo from catalog
+  const product = productCatalog[catalogIdx];
+  magasinsData[currentMagasin].items.unshift({ name, done: false, photo: product.photo });
+  renderMagasinItems();
+  input.value = '';
+  showToast('✓ ' + name + ' ajouté !');
+}
+
+// ── LISTES PAR MAGASIN ──
+const magasinsData = {
+  leclerc: { name: 'Leclerc', emoji: '🟦', color: '#0052A5', items: [
+    { name: 'Sauce tomate × 3', done: false },
+    { name: 'Yaourts enfants', done: false },
+    { name: 'Pain de mie', done: true },
+  ]},
+  lidl: { name: 'Lidl', emoji: '🟡', color: '#FFD700', items: [
+    { name: 'PQ × 12', done: false },
+    { name: 'Lessive', done: false },
+  ]},
+  auchan: { name: 'Auchan', emoji: '🟠', color: '#E2001A', items: [
+    { name: 'Cartouches imprimante HP', done: false },
+  ]},
+  autre: { name: 'Autre', emoji: '🔧', color: '#8C7B74', items: [
+    { name: 'Eau pétillante × 6', done: false },
+  ]},
+};
+
+let currentMagasin = null;
+let selectedListeEmoji = '🛒';
+
+function openMagasin(id) {
+  currentMagasin = id;
+  const mag = magasinsData[id];
+  document.getElementById('magasin-detail-title').textContent = mag.emoji + ' ' + mag.name;
+  renderMagasinItems();
+  document.getElementById('magasins-list').style.display = 'none';
+  document.querySelector('.magasins-header').style.display = 'none';
+  document.getElementById('magasin-detail').style.display = 'block';
+}
+
+function renderMagasinItems() {
+  const mag = magasinsData[currentMagasin];
+  const list = document.getElementById('magasin-items-list');
+  list.innerHTML = mag.items.map((item, i) => `
+    <div class="course-item ${item.done ? 'course-done' : ''}" onclick="toggleMagasinItem(${i})">
+      <div class="course-check ${item.done ? 'course-checked' : ''}">${item.done ? '✓' : '○'}</div>
+      ${item.photo ? `<img src="${item.photo}" class="course-photo" onclick="event.stopPropagation();showPhotoZoom('${item.photo}')">` : `<div class="course-photo-placeholder" onclick="event.stopPropagation();addPhotoToItem(${i})">📷</div>`}
+      <div class="course-info">
+        <div class="course-name" style="${item.done ? 'text-decoration:line-through;color:var(--muted)' : ''}">${item.name}</div>
+        <div class="course-meta">${mag.emoji} ${mag.name}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleMagasinItem(i) {
+  magasinsData[currentMagasin].items[i].done = !magasinsData[currentMagasin].items[i].done;
+  renderMagasinItems();
+  showToast(magasinsData[currentMagasin].items[i].done ? '✓ Article coché !' : 'Article décoché');
+}
+
+function addMagasinArticle() {
+  const input = document.getElementById('new-magasin-article');
+  const val = input.value.trim();
+  if (!val) return;
+  // Add to list
+  magasinsData[currentMagasin].items.unshift({ name: val, done: false, photo: null });
+  // Save to catalog if not already there
+  const exists = productCatalog.find(p => p.name.toLowerCase() === val.toLowerCase());
+  if (!exists) {
+    productCatalog.push({ name: val, photo: null, magasin: magasinsData[currentMagasin].name });
+  }
+  renderMagasinItems();
+  input.value = '';
+  document.getElementById('article-suggestions').style.display = 'none';
+  showToast('✓ Article ajouté à ' + magasinsData[currentMagasin].name + ' !');
+}
+
+function closeMagasin() {
+  document.getElementById('magasins-list').style.display = 'flex';
+  document.querySelector('.magasins-header').style.display = 'flex';
+  document.getElementById('magasin-detail').style.display = 'none';
+  currentMagasin = null;
+}
+
+function openAddListe() {
+  document.getElementById('nouvelle-liste-modal').classList.add('open');
+}
+
+function closeAddListe() {
+  document.getElementById('nouvelle-liste-modal').classList.remove('open');
+}
+
+function pickListeEmoji(el) {
+  document.querySelectorAll('.emoji-pick').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedListeEmoji = el.textContent;
+}
+
+function createListe() {
+  const name = document.getElementById('new-liste-name').value.trim();
+  if (!name) { showToast('⚠️ Donne un nom au magasin !'); return; }
+  const id = name.toLowerCase().replace(/\s/g, '_') + '_' + Date.now();
+  magasinsData[id] = { name, emoji: selectedListeEmoji, color: '#8C7B74', items: [] };
+  const list = document.getElementById('magasins-list');
+  const card = document.createElement('div');
+  card.className = 'magasin-card';
+  card.onclick = () => openMagasin(id);
+  card.innerHTML = `
+    <div class="magasin-color" style="background:#8C7B74"></div>
+    <div class="magasin-emoji">${selectedListeEmoji}</div>
+    <div class="magasin-info"><div class="magasin-name">${name}</div><div class="magasin-count">0 article</div></div>
+    <div class="magasin-arrow">›</div>
+  `;
+  list.appendChild(card);
+  closeAddListe();
+  document.getElementById('new-liste-name').value = '';
+  showToast('🎉 Liste "' + name + '" créée !');
+}
+
+// ── COURSES & REPAS ──
+function switchTab(el, tabId) {
+  el.closest('.courses-tabs').querySelectorAll('.ctab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.ctab-content').forEach(c => c.classList.remove('active-tab'));
+  document.getElementById(tabId).classList.add('active-tab');
+}
+
+function toggleCourse(el) {
+  const check = el.querySelector('.course-check');
+  const name = el.querySelector('.course-name');
+  if (check.classList.contains('course-checked')) {
+    check.classList.remove('course-checked'); check.textContent = '○';
+    name.style.textDecoration = ''; name.style.color = '';
+    el.classList.remove('course-done');
+  } else {
+    check.classList.add('course-checked'); check.textContent = '✓';
+    name.style.textDecoration = 'line-through'; name.style.color = 'var(--muted)';
+    el.classList.add('course-done');
+    showToast('✓ Article coché !');
+  }
+}
+
+function addCourse() {
+  const input = document.getElementById('new-course');
+  const val = input.value.trim();
+  if (!val) return;
+  const list = document.getElementById('courses-list');
+  const el = document.createElement('div');
+  el.className = 'course-item';
+  el.onclick = function(){ toggleCourse(this); };
+  el.innerHTML = `<div class="course-check">○</div><div class="course-info"><div class="course-name">${val}</div><div class="course-meta">🟡 Normal · Moi</div></div>`;
+  list.insertBefore(el, list.lastElementChild);
+  input.value = '';
+  showToast('✓ Article ajouté !');
+}
+
+function selectTemps(el, temps) {
+  document.querySelectorAll('.temps-btn').forEach(b => b.classList.remove('active-temps'));
+  el.classList.add('active-temps');
+  const repas = {
+    rapide: [
+      { emoji:'🥗', name:'Salade niçoise', meta:'⚡ 15 min · Sans cuisson · 4 pers.' },
+      { emoji:'🍳', name:'Omelette aux légumes', meta:'⚡ 10 min · Facile · 4 pers.' },
+      { emoji:'🥪', name:'Wraps au poulet', meta:'⚡ 15 min · Froid · 4 pers.' },
+    ],
+    normal: [
+      { emoji:'🍝', name:'Pâtes bolognaise', meta:'🕐 30 min · Facile · 4 pers.' },
+      { emoji:'🍗', name:'Poulet sauté aux légumes', meta:'🕐 25 min · Moyen · 4 pers.' },
+      { emoji:'🥘', name:'Poêlée de légumes + riz', meta:'🕐 30 min · Végé · 4 pers.' },
+    ],
+    slow: [
+      { emoji:'🫕', name:'Blanquette de veau', meta:'👨‍🍳 1h30 · Mijoté · 4 pers.' },
+      { emoji:'🍖', name:'Rôti de porc', meta:'👨‍🍳 1h · Four · 4 pers.' },
+      { emoji:'🥗', name:'Gratin dauphinois', meta:'👨‍🍳 1h15 · Four · 4 pers.' },
+    ]
+  };
+  const list = document.getElementById('repas-list');
+  list.innerHTML = repas[temps].map(r => `
+    <div class="repas-card" onclick="selectRepas(this)">
+      <div class="repas-emoji">${r.emoji}</div>
+      <div class="repas-info"><div class="repas-name">${r.name}</div><div class="repas-meta">${r.meta}</div></div>
+      <div class="repas-assign-btn">Planifier</div>
+    </div>
+  `).join('');
+}
+
+function selectRepas(el) {
+  document.querySelectorAll('.repas-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  const name = el.querySelector('.repas-name').textContent;
+  showToast('🍽️ ' + name + ' ajouté au menu !');
+}
+
+let cartePhotoData = {};
+
+function photoCartePhysique(source) {
+  if (source === 'camera') {
+    document.getElementById('carte-photo-input').click();
+  } else {
+    document.getElementById('carte-gallery-input').click();
+  }
+}
+
+function handleCartePhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const src = e.target.result;
+    const carteName = document.getElementById('carte-display-name').textContent;
+    cartePhotoData[carteName] = src;
+    // Show in photo tab
+    document.getElementById('carte-photo-img-tab').src = src;
+    document.getElementById('photo-carte-empty').style.display = 'none';
+    document.getElementById('photo-carte-filled').style.display = 'block';
+    // Switch to photo tab
+    document.querySelectorAll('.code-tab').forEach((t,i) => t.classList.toggle('active', i===2));
+    document.querySelectorAll('.code-view').forEach((v,i) => v.classList.toggle('active-code-view', i===2));
+    showToast('📷 Photo de la carte ' + carteName + ' enregistrée !');
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function saveCarteAsImage() {
+  const name = document.getElementById('carte-display-name').textContent;
+  const num = document.getElementById('carte-display-num').textContent;
+  const bg = document.getElementById('carte-display-inner').style.background;
+
+  // Create a canvas to render the card
+  const canvas = document.createElement('canvas');
+  canvas.width = 600; canvas.height = 340;
+  const ctx = canvas.getContext('2d');
+
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, 600, 340);
+  grad.addColorStop(0, '#2D2420');
+  grad.addColorStop(1, '#1a1a1a');
+  ctx.fillStyle = grad;
+  ctx.roundRect(0, 0, 600, 340, 24);
+  ctx.fill();
+
+  // App name
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '500 18px sans-serif';
+  ctx.fillText('🧠 Ma Décharge Mentale', 30, 44);
+
+  // Store name
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 32px sans-serif';
+  ctx.fillText(name, 30, 100);
+
+  // Card number
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '500 22px monospace';
+  ctx.fillText(num, 30, 145);
+
+  // Barcode visual
+  ctx.fillStyle = 'white';
+  ctx.roundRect(30, 175, 540, 80, 10);
+  ctx.fill();
+
+  // Barcode lines
+  let x = 40;
+  const seed = num.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
+  for (let i = 0; i < 120; i++) {
+    const w = (Math.sin(seed + i * 7.3) > 0.3) ? 3 : (Math.sin(seed + i * 3.7) > 0 ? 2 : 1);
+    if (Math.sin(seed + i * 5.1) > 0) {
+      ctx.fillStyle = '#1B1B1B';
+      ctx.fillRect(x, 185, w, 58);
+    }
+    x += w + 2;
+    if (x > 560) break;
+  }
+
+  // Card number below barcode
+  ctx.fillStyle = '#555';
+  ctx.font = '400 14px monospace';
+  ctx.fillText(num, 200, 274);
+
+  // Footer
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.font = '400 13px sans-serif';
+  ctx.fillText('Partagée via Ma Décharge Mentale', 30, 320);
+
+  // Download
+  const link = document.createElement('a');
+  link.download = `carte-${name.toLowerCase().replace(/\s/g,'-')}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('🖼️ Carte enregistrée dans ta galerie !');
+}
+
+function switchCodeTab(el, viewId) {
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.code-view').forEach(v => v.classList.remove('active-code-view'));
+  document.getElementById(viewId).classList.add('active-code-view');
+  if (viewId === 'qr-view') generateQR(document.getElementById('carte-display-num').textContent);
+}
+
+function generateQR(text) {
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  const size = 160;
+  const cellSize = 8;
+  const cells = Math.floor(size / cellSize);
+
+  // Simple visual QR-like pattern (decorative, not scannable — real QR needs a library)
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, size, size);
+
+  // Use text to seed a deterministic pattern
+  let seed = 0;
+  for (let i = 0; i < text.length; i++) seed += text.charCodeAt(i);
+
+  function seededRand(s) {
+    const x = Math.sin(s) * 10000;
+    return x - Math.floor(x);
+  }
+
+  ctx.fillStyle = '#1B1B1B';
+
+  // Finder patterns (3 corners)
+  const drawFinder = (x, y) => {
+    ctx.fillRect(x*cellSize, y*cellSize, 7*cellSize, 7*cellSize);
+    ctx.fillStyle = 'white';
+    ctx.fillRect((x+1)*cellSize, (y+1)*cellSize, 5*cellSize, 5*cellSize);
+    ctx.fillStyle = '#1B1B1B';
+    ctx.fillRect((x+2)*cellSize, (y+2)*cellSize, 3*cellSize, 3*cellSize);
+  };
+  drawFinder(0,0); drawFinder(cells-7,0); drawFinder(0,cells-7);
+
+  // Data cells
+  for (let row = 0; row < cells; row++) {
+    for (let col = 0; col < cells; col++) {
+      const inFinder = (row<8&&col<8)||(row<8&&col>cells-9)||(row>cells-9&&col<8);
+      if (!inFinder && seededRand(seed + row * cells + col) > 0.45) {
+        ctx.fillStyle = '#1B1B1B';
+        ctx.fillRect(col*cellSize, row*cellSize, cellSize-1, cellSize-1);
+      }
+    }
+  }
+}
+
+function showCarte(name, num, label, color) {
+  document.getElementById('carte-display-name').textContent = label;
+  document.getElementById('carte-display-num').textContent = num;
+  document.getElementById('barcode-num').textContent = num;
+  document.getElementById('carte-display-inner').style.background = `linear-gradient(135deg, ${color}, #1a1a1a)`;
+  // Reset to barcode tab
+  document.querySelectorAll('.code-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+  document.querySelectorAll('.code-view').forEach((v,i) => v.classList.toggle('active-code-view', i===0));
+  // Restore photo if exists
+  if (cartePhotoData[label]) {
+    document.getElementById('carte-photo-img-tab').src = cartePhotoData[label];
+    document.getElementById('photo-carte-empty').style.display = 'none';
+    document.getElementById('photo-carte-filled').style.display = 'block';
+  } else {
+    document.getElementById('photo-carte-empty').style.display = 'block';
+    document.getElementById('photo-carte-filled').style.display = 'none';
+  }
+  document.getElementById('carte-modal').classList.add('open');
+}
+
+function closeCarte() {
+  document.getElementById('carte-modal').classList.remove('open');
+}
+
+function acceptSuggestion(card) {
+  card.classList.add('done');
+  showToast('✓ Tâche transférée à Marc ! Il sera notifié. 🎉');
+  setTimeout(() => card.remove(), 400);
+}
+
+function declineSuggestion(card) {
+  card.classList.add('done');
+  setTimeout(() => card.remove(), 400);
+}
+
+function toggleSwitch(el) {
+  el.classList.toggle('active');
+}
+
+function selectTime(el) {
+  el.closest('.time-slots').querySelectorAll('.time-slot').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function saveNotifs() {
+  showToast('✅ Préférences enregistrées !');
+  setTimeout(() => goTo('dashboard'), 1000);
+}
+
+// ── À SAISIR ──
+let saisirTasks = [
+  { name: 'Changer les piles de la télécommande', cat: '🔧 Divers' },
+  { name: 'Rappeler le plombier', cat: '🏠 Maison' },
+  { name: 'Commander les cartouches d\'encre', cat: '🚗 Voiture' },
+];
+let pendingPhotoItemIndex = null;
+
+function updateSaisirFab() {
+  const fab = document.getElementById('saisir-fab');
+  const count = document.getElementById('saisir-count');
+  const currentScreen = document.querySelector('.screen.active');
+  const isHome = currentScreen && currentScreen.id === 'screen-home';
+  if (saisirTasks.length > 0 && !isHome) {
+    fab.classList.add('visible');
+    count.textContent = saisirTasks.length;
+  } else {
+    fab.classList.remove('visible');
+  }
+}
+
+function openSaisir() {
+  renderSaisirList();
+  document.getElementById('saisir-modal').classList.add('open');
+}
+
+function closeSaisir() {
+  document.getElementById('saisir-modal').classList.remove('open');
+}
+
+function renderSaisirList() {
+  const list = document.getElementById('saisir-list');
+  if (saisirTasks.length === 0) {
+    list.innerHTML = '<div class="saisir-empty"><div class="big">✨</div><p>Aucune tâche libre pour l\'instant.<br>Ajoutez-en une ci-dessous !</p></div>';
+    return;
+  }
+  list.innerHTML = saisirTasks.map((t, i) => `
+    <div class="saisir-task-row" id="saisir-row-${i}">
+      <div class="saisir-task-info">
+        <div class="saisir-task-name">${t.name}</div>
+        <div class="saisir-task-cat">${t.cat}</div>
+      </div>
+      <button class="saisir-take-btn" onclick="takeSaisirTask(${i})">Je le fais ✓</button>
+    </div>
+  `).join('');
+}
+
+function takeSaisirTask(i) {
+  const name = saisirTasks[i].name;
+  saisirTasks.splice(i, 1);
+  renderSaisirList();
+  updateSaisirFab();
+  showToast('💪 Tâche prise en charge !');
+}
+
+function addSaisirTask() {
+  const input = document.getElementById('new-saisir');
+  const val = input.value.trim();
+  if (!val) return;
+  saisirTasks.push({ name: val, cat: '🔧 Divers' });
+  input.value = '';
+  renderSaisirList();
+  updateSaisirFab();
+  showToast('✓ Tâche ajoutée à la liste libre !');
+}
+
+// ── PHOTO PRODUIT ──
+function addPhotoToItem(index) {
+  pendingPhotoItemIndex = index;
+  // Show choice: camera or gallery
+  const choice = confirm('📷 Prendre une photo ?\n\nOK = Appareil photo\nAnnuler = Galerie');
+  if (choice) {
+    document.getElementById('photo-input').click();
+  } else {
+    document.getElementById('photo-gallery').click();
+  }
+}
+
+function handlePhotoCapture(event) {
+  const file = event.target.files[0];
+  if (!file || pendingPhotoItemIndex === null) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const photo = e.target.result;
+    const itemName = magasinsData[currentMagasin].items[pendingPhotoItemIndex].name;
+    // Save to item
+    magasinsData[currentMagasin].items[pendingPhotoItemIndex].photo = photo;
+    // Save to catalog
+    const catalogEntry = productCatalog.find(p => p.name.toLowerCase() === itemName.toLowerCase());
+    if (catalogEntry) catalogEntry.photo = photo;
+    else productCatalog.push({ name: itemName, photo, magasin: magasinsData[currentMagasin].name });
+    renderMagasinItems();
+    showToast('📸 Photo enregistrée pour ' + itemName + ' !');
+    pendingPhotoItemIndex = null;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function showPhotoZoom(src) {
+  document.getElementById('photo-zoom-img').src = src;
+  document.getElementById('photo-zoom').classList.add('open');
+}
+
+// Update goTo to refresh saisir fab visibility
+// goTo unified above
+
+// Init — restore from localStorage
+function initApp() {
+  try {
+    const n1 = localStorage.getItem('mdm_name1');
+    const n2 = localStorage.getItem('mdm_name2');
+    const a1 = localStorage.getItem('mdm_avatar1');
+    const a2 = localStorage.getItem('mdm_avatar2');
+    if (n1 && n2) {
+      // Restore profile
+      document.getElementById('name-1').value = n1;
+      document.getElementById('name-2').value = n2;
+      avatar1 = a1 || '🧑';
+      avatar2 = a2 || '🧑';
+      document.getElementById('manage-label-1').textContent = n1;
+      document.getElementById('manage-label-2').textContent = n2;
+      document.getElementById('manage-emoji-1').textContent = avatar1;
+      document.getElementById('manage-emoji-2').textContent = avatar2;
+      // Update dashboard greeting
+      document.querySelector('.top-greeting span').textContent = n1 + ' ☀️';
+      // Go straight to dashboard
+      goTo('dashboard');
+      return;
+    }
+  } catch(e) {}
+}
+updateSaisirFab();
+initApp();
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
