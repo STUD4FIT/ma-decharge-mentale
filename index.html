@@ -2,6 +2,12 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ma Décharge Mentale">
+<meta name="theme-color" content="#2D2420">
+<link rel="apple-touch-icon" id="pwa-icon" href="">
+<link rel="manifest" href="manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ma Décharge Mentale</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -1216,6 +1222,27 @@
   .add-saisir-row { display: flex; gap: 8px; margin-top: 12px; }
 
 </style>
+
+<script>
+// Generate PWA icon
+(function() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  // Background
+  ctx.fillStyle = '#2D2420';
+  ctx.roundRect(0, 0, 512, 512, 80);
+  ctx.fill();
+  // Brain emoji
+  ctx.font = '340px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('🧠', 256, 380);
+  const dataUrl = canvas.toDataURL('image/png');
+  document.getElementById('pwa-icon').href = dataUrl;
+  // Also update manifest icons dynamically
+  window._pwaIcon = dataUrl;
+})();
+</script>
 </head>
 <body>
 
@@ -2689,7 +2716,15 @@ let currentCat = null;
 
 function goTo(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + screenId).classList.add('active');
+  const target = document.getElementById('screen-' + screenId);
+  if (target) target.classList.add('active');
+  if (screenId === 'enfants') {
+    currentEnfantSection = 'agenda';
+    setTimeout(renderEnfantContent, 50);
+  }
+  setTimeout(updateSaisirFab, 100);
+  // Save last screen
+  try { localStorage.setItem('mdm_screen', screenId); } catch(e) {}
 }
 
 let avatar1 = '🧑', avatar2 = '🧑';
@@ -2713,6 +2748,13 @@ function goStep2() {
   document.getElementById('manage-label-2').textContent = n2;
   document.getElementById('manage-emoji-1').textContent = avatar1;
   document.getElementById('manage-emoji-2').textContent = avatar2;
+  // Save to localStorage
+  try {
+    localStorage.setItem('mdm_name1', n1);
+    localStorage.setItem('mdm_name2', n2);
+    localStorage.setItem('mdm_avatar1', avatar1);
+    localStorage.setItem('mdm_avatar2', avatar2);
+  } catch(e) {}
   document.getElementById('step-1').classList.remove('active-step');
   document.getElementById('step-2').classList.add('active-step');
 }
@@ -3643,18 +3685,37 @@ function showPhotoZoom(src) {
 }
 
 // Update goTo to refresh saisir fab visibility
-const _origGoTo = goTo;
-function goTo(screenId) {
-  _origGoTo(screenId);
-  if (screenId === 'enfants') {
-    currentEnfantSection = 'agenda';
-    renderEnfantContent();
-  }
-  setTimeout(updateSaisirFab, 50);
-}
+// goTo unified above
 
-// Init
-updateSaisirFab();
+// Init — restore from localStorage
+function initApp() {
+  try {
+    const n1 = localStorage.getItem('mdm_name1');
+    const n2 = localStorage.getItem('mdm_name2');
+    const a1 = localStorage.getItem('mdm_avatar1');
+    const a2 = localStorage.getItem('mdm_avatar2');
+    if (n1 && n2) {
+      // Restore profile
+      document.getElementById('name-1').value = n1;
+      document.getElementById('name-2').value = n2;
+      avatar1 = a1 || '🧑';
+      avatar2 = a2 || '🧑';
+      document.getElementById('manage-label-1').textContent = n1;
+      document.getElementById('manage-label-2').textContent = n2;
+      document.getElementById('manage-emoji-1').textContent = avatar1;
+      document.getElementById('manage-emoji-2').textContent = avatar2;
+      // Update dashboard greeting
+      document.querySelector('.top-greeting span').textContent = n1 + ' ☀️';
+      // Go straight to dashboard
+      goTo('dashboard');
+      return;
+    }
+  } catch(e) {}
+}
+document.addEventListener('DOMContentLoaded', function() {
+  updateSaisirFab();
+  initApp();
+});
 
 function showToast(msg) {
   const t = document.getElementById('toast');
