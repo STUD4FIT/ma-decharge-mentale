@@ -1258,7 +1258,12 @@
 <script>
 const SUPABASE_URL = 'https://pbcwxzyzmantjufsasyz.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_KUTvoyHXL2f0AEePBTrmdg_wEMv6I2b';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase;
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } catch(e) { console.log('Supabase init error:', e); }
+});
 
 // ── SYNC SUPABASE ──
 let coupleId = null;
@@ -2937,13 +2942,14 @@ function selectManage(el) {
 }
 
 async function goToDashboard() {
-  const n1 = localStorage.getItem('mdm_name1');
-  const n2 = localStorage.getItem('mdm_name2');
-  const a1 = localStorage.getItem('mdm_avatar1');
-  const a2 = localStorage.getItem('mdm_avatar2');
-  // Create couple in Supabase
-  await createCouple(n1, n2, a1, a2);
-  subscribeToCouple();
+  try {
+    const n1 = localStorage.getItem('mdm_name1');
+    const n2 = localStorage.getItem('mdm_name2');
+    const a1 = localStorage.getItem('mdm_avatar1') || '🧑';
+    const a2 = localStorage.getItem('mdm_avatar2') || '🧑';
+    await createCouple(n1, n2, a1, a2);
+    subscribeToCouple();
+  } catch(e) { console.log('Supabase error:', e); }
   goTo('dashboard');
 }
 
@@ -3891,8 +3897,7 @@ async function initApp() {
       document.getElementById('manage-emoji-2').textContent = avatar2;
       // Update all partner name displays
       updateAllNames(n1, n2);
-      await initSupabase();
-      subscribeToCouple();
+      try { await initSupabase(); subscribeToCouple(); } catch(e) {}
       goTo('dashboard');
       return;
     }
@@ -3912,7 +3917,7 @@ function updateAllNames(n1, n2) {
   const partnerBalanceSub = document.getElementById('partner-balance-sub');
   if (partnerBalanceSub) partnerBalanceSub.textContent = n2 + ' peut voir la répartition des tâches';
   // Update dashboard greeting
-  const greeting = document.querySelector('.top-greeting span');
+  const greeting = document.getElementById('greeting-name');
   if (greeting) greeting.textContent = n1 + ' ☀️';
   // Update top-sub
   const topSub = document.querySelector('#screen-dashboard .top-sub');
@@ -3932,9 +3937,9 @@ function updateAllNames(n1, n2) {
   const courseSub = document.querySelector('#screen-courses .top-sub');
   if (courseSub) courseSub.textContent = 'Partagé avec ' + n2 + ' · Mis à jour à l\'instant';
 }
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   updateSaisirFab();
-  initApp();
+  await initApp();
 });
 
 function showToast(msg) {
