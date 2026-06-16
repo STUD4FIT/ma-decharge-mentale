@@ -1259,11 +1259,9 @@
 const SUPABASE_URL = 'https://pbcwxzyzmantjufsasyz.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_KUTvoyHXL2f0AEePBTrmdg_wEMv6I2b';
 let supabase;
-document.addEventListener('DOMContentLoaded', function() {
-  try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  } catch(e) { console.log('Supabase init error:', e); }
-});
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e) { console.log('Supabase init error:', e); }
 
 // ── SYNC SUPABASE ──
 let coupleId = null;
@@ -1360,7 +1358,7 @@ async function saveToSupabase() {
 }
 
 async function loadFromSupabase() {
-  if (!coupleId) return;
+  if (!coupleId || !supabase) return;
   
   const { data, error } = await supabase
     .from('couples')
@@ -1394,7 +1392,7 @@ function subscribeToCouple() {
         if (shared.magasins) Object.assign(magasinsData, shared.magasins);
         if (shared.saisir) { saisirTasks.length = 0; saisirTasks.push(...shared.saisir); }
         updateSaisirFab();
-        showToast('🔄 Mis à jour par ' + getPartnerName() + ' !');
+        showToast('🔄 Mis à jour par ton partenaire !');
       }
     )
     .subscribe();
@@ -1483,21 +1481,21 @@ function subscribeToCouple() {
 <!-- ═══════════════════ DASHBOARD ═══════════════════ -->
 <div id="screen-dashboard" class="screen">
   <div class="top-bar">
-    <div class="top-greeting">Bonjour, <span>' + getUserName() + '</span> ☀️</div>
+    <div class="top-greeting">Bonjour, <span id="greeting-name">☀️</span></div>
     <div class="top-sub">7 tâches en cours · 2 urgentes</div>
 
     <div class="score-bar">
       <div class="score-pill">
         <span class="emoji">👩</span>
         <div>
-          <div class="name">' + getUserName() + '</div>
+          <div class="name" id="score-name1">Moi</div>
           <div class="val">12 tâches</div>
         </div>
       </div>
       <div class="score-pill">
         <span class="emoji">👨</span>
         <div>
-          <div class="name">' + getPartnerName() + '</div>
+          <div class="name" id="score-name2">Partenaire</div>
           <div class="val">5 tâches</div>
         </div>
       </div>
@@ -1616,7 +1614,7 @@ function subscribeToCouple() {
       <div class="eq-profiles">
         <div class="eq-profile">
           <div class="eq-avatar">🧑</div>
-          <div class="eq-name">' + getUserName() + '</div>
+          <div class="eq-name" id="eq-profile-name1">Moi</div>
           <div class="eq-count">12 tâches</div>
           <div class="eq-pct" style="color:var(--urgent)">71%</div>
         </div>
@@ -1629,14 +1627,14 @@ function subscribeToCouple() {
         </div>
         <div class="eq-profile">
           <div class="eq-avatar">🧑</div>
-          <div class="eq-name">' + getPartnerName() + '</div>
+          <div class="eq-name" id="eq-profile-name2">Partenaire</div>
           <div class="eq-count">5 tâches</div>
           <div class="eq-pct" style="color:var(--sage)">29%</div>
         </div>
       </div>
 
       <div class="eq-message">
-        💬 <em>' + getUserName() + ' porte 71% de la charge cette semaine. L'équilibre idéal serait autour de 50/50.</em>
+        💬 <em id="eq-message-text">Tu portes 71% de la charge cette semaine. L'équilibre idéal serait autour de 50/50.</em>
       </div>
     </div>
 
@@ -1650,8 +1648,8 @@ function subscribeToCouple() {
           <div class="mini-bar"><div class="mini-fill" style="width:80%;background:var(--urgent)"></div></div>
         </div>
         <div class="cat-eq-split">
-          <span style="color:var(--urgent)">' + getUserName() + ' 80%</span>
-          <span style="color:var(--muted)"> · ' + getPartnerName() + ' 20%</span>
+          <span style="color:var(--urgent)">Moi 80%</span>
+          <span style="color:var(--muted)"> · Partenaire 20%</span>
         </div>
       </div>
       <div class="setting-divider"></div>
@@ -1662,8 +1660,8 @@ function subscribeToCouple() {
           <div class="mini-bar"><div class="mini-fill" style="width:60%;background:#E8A84A"></div></div>
         </div>
         <div class="cat-eq-split">
-          <span style="color:#E8A84A">' + getUserName() + ' 60%</span>
-          <span style="color:var(--muted)"> · ' + getPartnerName() + ' 40%</span>
+          <span style="color:#E8A84A">Moi 60%</span>
+          <span style="color:var(--muted)"> · Partenaire 40%</span>
         </div>
       </div>
       <div class="setting-divider"></div>
@@ -1674,8 +1672,8 @@ function subscribeToCouple() {
           <div class="mini-bar"><div class="mini-fill" style="width:30%;background:var(--sage)"></div></div>
         </div>
         <div class="cat-eq-split">
-          <span style="color:var(--sage)">' + getUserName() + ' 30%</span>
-          <span style="color:var(--muted)"> · ' + getPartnerName() + ' 70%</span>
+          <span style="color:var(--sage)">Moi 30%</span>
+          <span style="color:var(--muted)"> · Partenaire 70%</span>
         </div>
       </div>
       <div class="setting-divider"></div>
@@ -1697,12 +1695,12 @@ function subscribeToCouple() {
     <div class="suggestion-card" onclick="acceptSuggestion(this)">
       <div class="suggestion-header">
         <div class="suggestion-tag">🛒 Courses & Repas</div>
-        <div class="suggestion-action-label">Transférer à ' + getPartnerName() + ' →</div>
+        <div class="suggestion-action-label">Transférer à ton partenaire →</div>
       </div>
-      <div class="suggestion-title">Confier les courses du week-end à ' + getPartnerName() + '</div>
-      <div class="suggestion-body">Tu fais les courses 4 fois sur 5. Proposer à ' + getPartnerName() + ' de prendre le relais le samedi matin libérerait 45min de ta charge hebdomadaire.</div>
+      <div class="suggestion-title">Confier les courses du week-end à ton partenaire</div>
+      <div class="suggestion-body">Tu fais les courses 4 fois sur 5. Proposer à ton partenaire de prendre le relais le samedi matin libérerait 45min de ta charge hebdomadaire.</div>
       <div class="suggestion-btns">
-        <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Transférer à ' + getPartnerName() + '</button>
+        <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Transférer à ton partenaire</button>
         <button class="sug-btn decline" onclick="declineSuggestion(this.closest('.suggestion-card'))">Pas maintenant</button>
       </div>
     </div>
@@ -1712,10 +1710,10 @@ function subscribeToCouple() {
         <div class="suggestion-tag">👶 Enfants</div>
         <div class="suggestion-action-label">Partager →</div>
       </div>
-      <div class="suggestion-title">Le prochain RDV médecin, c'est ' + getPartnerName() + ' qui y va</div>
+      <div class="suggestion-title">Le prochain RDV médecin, c'est ton partenaire qui y va</div>
       <div class="suggestion-body">Tu gères 100% des rendez-vous médicaux. Une fois sur deux suffirait à alléger ta charge mentale sans tout bouleverser.</div>
       <div class="suggestion-btns">
-        <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Créer le rappel pour ' + getPartnerName() + '</button>
+        <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Créer le rappel pour ton partenaire</button>
         <button class="sug-btn decline" onclick="declineSuggestion(this.closest('.suggestion-card'))">Pas maintenant</button>
       </div>
     </div>
@@ -1725,7 +1723,7 @@ function subscribeToCouple() {
         <div class="suggestion-tag">🍽️ Repas</div>
         <div class="suggestion-action-label">Partager →</div>
       </div>
-      <div class="suggestion-title">1 soir sur 2, c'est ' + getPartnerName() + ' qui décide du repas</div>
+      <div class="suggestion-title">1 soir sur 2, c'est ton partenaire qui décide du repas</div>
       <div class="suggestion-body">Le "qu'est-ce qu'on mange ?" quotidien pèse lourd. Alterner la décision enlève cette micro-charge qui s'accumule.</div>
       <div class="suggestion-btns">
         <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Ajouter la règle</button>
@@ -1810,7 +1808,7 @@ function subscribeToCouple() {
           <span class="notif-time">maintenant</span>
         </div>
         <div class="notif-title-text">🔴 Urgent — Spectacle école Emma</div>
-        <div class="notif-body-text">Demain 18h · Attribuée à ' + getPartnerName() + ' · Pas encore fait ✗</div>
+        <div class="notif-body-text">Demain 18h · Attribuée à ton partenaire · Pas encore fait ✗</div>
       </div>
       <div class="notif-preview notif-preview-normal" id="notif-preview-normal">
         <div class="notif-app-row">
@@ -1884,7 +1882,7 @@ function subscribeToCouple() {
       <div class="setting-row" style="flex-direction:column; align-items:flex-start; gap:12px;">
         <div class="setting-info">
           <div class="setting-label">Heure du partenaire</div>
-          <div class="setting-sub">' + getPartnerName() + ' reçoit ses notifs à</div>
+          <div class="setting-sub">ton partenaire reçoit ses notifs à</div>
         </div>
         <div class="time-slots">
           <div class="time-slot" onclick="selectTime(this)">7h00</div>
@@ -1904,7 +1902,7 @@ function subscribeToCouple() {
         <div class="recur-dot" style="background:var(--rose)"></div>
         <div class="recur-info">
           <div class="setting-label">Poubelle noire</div>
-          <div class="setting-sub">Dimanche · ' + getPartnerName() + ' · Chaque semaine</div>
+          <div class="setting-sub">Dimanche · ton partenaire · Chaque semaine</div>
         </div>
         <div class="recur-badge">Sam 18h</div>
       </div>
@@ -1913,7 +1911,7 @@ function subscribeToCouple() {
         <div class="recur-dot" style="background:var(--sage)"></div>
         <div class="recur-info">
           <div class="setting-label">Poubelle jaune</div>
-          <div class="setting-sub">Mardi · ' + getPartnerName() + ' · 1 sem / 2</div>
+          <div class="setting-sub">Mardi · ton partenaire · 1 sem / 2</div>
         </div>
         <div class="recur-badge">Lun 18h</div>
       </div>
@@ -1954,7 +1952,7 @@ function subscribeToCouple() {
       <div class="eq-avatars">
         <div class="eq-avatar-block">
           <div class="eq-avatar">🧑</div>
-          <div class="eq-name">' + getUserName() + '</div>
+          <div class="eq-name" id="eq-profile-name1">Moi</div>
           <div class="eq-score" style="color:var(--rose)">68%</div>
           <div class="eq-tasks">12 tâches</div>
         </div>
@@ -1964,7 +1962,7 @@ function subscribeToCouple() {
         </div>
         <div class="eq-avatar-block">
           <div class="eq-avatar">🧑</div>
-          <div class="eq-name">' + getPartnerName() + '</div>
+          <div class="eq-name" id="eq-profile-name2">Partenaire</div>
           <div class="eq-score" style="color:var(--sage)">32%</div>
           <div class="eq-tasks">5 tâches</div>
         </div>
@@ -1977,13 +1975,13 @@ function subscribeToCouple() {
           <div class="eq-bar-marc" style="width:32%"></div>
         </div>
         <div class="eq-bar-labels">
-          <span style="color:var(--rose)">' + getUserName() + ' 68%</span>
-          <span style="color:var(--sage)">' + getPartnerName() + ' 32%</span>
+          <span style="color:var(--rose)">toi 68%</span>
+          <span style="color:var(--sage)">ton partenaire 32%</span>
         </div>
       </div>
 
       <div class="eq-tip">
-        💡 Si ' + getPartnerName() + ' prenait 3 tâches de plus, vous seriez à l'équilibre
+        💡 Si ton partenaire prenait 3 tâches de plus, vous seriez à l'équilibre
       </div>
     </div>
 
@@ -2106,11 +2104,11 @@ function subscribeToCouple() {
           </div>
         </div>
         <div class="chart-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--rose)"></div> ' + getUserName() + '</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--sage)"></div> ' + getPartnerName() + '</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--rose)"></div> toi</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--sage)"></div> ton partenaire</div>
         </div>
       </div>
-      <div class="eq-tip" style="margin-top:8px">📈 ' + getPartnerName() + ' a pris 4% de plus cette semaine — bonne direction !</div>
+      <div class="eq-tip" style="margin-top:8px">📈 ton partenaire a pris 4% de plus cette semaine — bonne direction !</div>
     </div>
 
     <!-- Suggestion IA -->
@@ -2118,7 +2116,7 @@ function subscribeToCouple() {
     <div class="ia-suggest-card">
       <div class="ia-icon">🧠</div>
       <div class="ia-text">
-        <div class="ia-title">3 tâches à redistribuer à ' + getPartnerName() + '</div>
+        <div class="ia-title">3 tâches à redistribuer à ton partenaire</div>
         <div class="ia-sub">Pour atteindre 55% / 45% cette semaine</div>
       </div>
     </div>
@@ -2128,21 +2126,21 @@ function subscribeToCouple() {
           <div class="suggest-title">🛒 Commander eau pétillante</div>
           <div class="suggest-meta">Courses · Pas urgent</div>
         </div>
-        <button class="suggest-btn">Donner à ' + getPartnerName() + ' →</button>
+        <button class="suggest-btn">Donner à ton partenaire →</button>
       </div>
       <div class="suggest-task" onclick="assignToPartner(this)">
         <div class="suggest-info">
           <div class="suggest-title">💰 Payer assurance voiture</div>
           <div class="suggest-meta">Factures · Dans 3 jours</div>
         </div>
-        <button class="suggest-btn">Donner à ' + getPartnerName() + ' →</button>
+        <button class="suggest-btn">Donner à ton partenaire →</button>
       </div>
       <div class="suggest-task" onclick="assignToPartner(this)">
         <div class="suggest-info">
           <div class="suggest-title">🔧 Contacter voisin pour le mur</div>
           <div class="suggest-meta">Divers · Normal</div>
         </div>
-        <button class="suggest-btn">Donner à ' + getPartnerName() + ' →</button>
+        <button class="suggest-btn">Donner à ton partenaire →</button>
       </div>
     </div>
 
@@ -2262,14 +2260,14 @@ function subscribeToCouple() {
     <div class="couple-profils">
       <div class="profil-card moi-card">
         <div class="profil-avatar">🧑</div>
-        <div class="profil-name">' + getUserName() + '</div>
+        <div class="profil-name" id="profil-name1">Moi</div>
         <div class="profil-role">Administratrice</div>
         <div class="profil-stats">12 tâches · 71% de charge</div>
       </div>
       <div class="profil-coeur">💛</div>
       <div class="profil-card lui-card">
         <div class="profil-avatar">🧑</div>
-        <div class="profil-name">' + getPartnerName() + '</div>
+        <div class="profil-name" id="profil-name2">Partenaire</div>
         <div class="profil-role">Partenaire</div>
         <div class="profil-stats">5 tâches · 29% de charge</div>
       </div>
@@ -2280,7 +2278,7 @@ function subscribeToCouple() {
     <div class="invite-card">
       <div class="invite-icon">📲</div>
       <div class="invite-text">
-        <div class="invite-title">' + getPartnerName() + ' n\'a pas encore l\'appli</div>
+        <div class="invite-title">ton partenaire n\'a pas encore l\'appli</div>
         <div class="invite-sub">Envoie-lui une invitation pour qu'il reçoive ses notifications</div>
       </div>
     </div>
@@ -2300,7 +2298,7 @@ function subscribeToCouple() {
     <div class="code-invite">
       <div class="code-label">Code d'invitation</div>
       <div class="code-value">MDM-4829</div>
-      <div class="code-sub">' + getPartnerName() + ' entre ce code à son inscription</div>
+      <div class="code-sub">ton partenaire entre ce code à son inscription</div>
     </div>
 
     <!-- Paramètres du couple -->
@@ -2309,7 +2307,7 @@ function subscribeToCouple() {
       <div class="setting-row">
         <div class="setting-info">
           <div class="setting-label">Tableau d'équilibre visible</div>
-          <div class="setting-sub">' + getPartnerName() + ' peut voir la répartition des tâches</div>
+          <div class="setting-sub">ton partenaire peut voir la répartition des tâches</div>
         </div>
         <div class="toggle active" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
       </div>
@@ -2426,7 +2424,7 @@ function subscribeToCouple() {
           </div>
           <div class="who-btn" onclick="selectWho(this,'partenaire')">
             <div class="who-avatar" id="modal-avatar-part">🧑</div>
-            <div class="who-name" id="modal-name-part">' + getPartnerName() + '</div>
+            <div class="who-name" id="modal-name-part">Partenaire</div>
           </div>
           <div class="who-btn" onclick="selectWho(this,'deux')">
             <div class="who-avatar">👫</div>
@@ -2518,7 +2516,7 @@ function subscribeToCouple() {
   <div class="top-bar">
     <button class="back-btn" onclick="goTo('dashboard')" style="margin-bottom:12px">←</button>
     <div class="top-greeting">🛒 Courses <span>& Repas</span></div>
-    <div class="top-sub">Partagé avec ' + getPartnerName() + ' · Mis à jour à l'instant</div>
+    <div class="top-sub">Partagé avec <span id="partner-name-courses">mon partenaire</span> · Mis à jour à l'instant</div>
   </div>
 
   <div class="dashboard-body">
@@ -2635,12 +2633,12 @@ function subscribeToCouple() {
 
       <div class="section-title">Menu de la semaine</div>
       <div class="menu-semaine">
-        <div class="menu-jour"><div class="jour-label">Lun</div><div class="jour-repas">Pâtes carbonara</div><div class="jour-qui">' + getPartnerName() + ' 👨</div></div>
+        <div class="menu-jour"><div class="jour-label">Lun</div><div class="jour-repas">Pâtes carbonara</div><div class="jour-qui">ton partenaire 👨</div></div>
         <div class="menu-jour"><div class="jour-label">Mar</div><div class="jour-repas">Poulet rôti</div><div class="jour-qui">Moi 👩</div></div>
         <div class="menu-jour today-menu"><div class="jour-label">Mer ✦</div><div class="jour-repas">À définir…</div><div class="jour-qui">—</div></div>
-        <div class="menu-jour"><div class="jour-label">Jeu</div><div class="jour-repas">Soupe + pain</div><div class="jour-qui">' + getPartnerName() + ' 👨</div></div>
+        <div class="menu-jour"><div class="jour-label">Jeu</div><div class="jour-repas">Soupe + pain</div><div class="jour-qui">ton partenaire 👨</div></div>
         <div class="menu-jour"><div class="jour-label">Ven</div><div class="jour-repas">Pizza maison</div><div class="jour-qui">Tous 👫</div></div>
-        <div class="menu-jour"><div class="jour-label">Sam</div><div class="jour-repas">Barbecue</div><div class="jour-qui">' + getPartnerName() + ' 👨</div></div>
+        <div class="menu-jour"><div class="jour-label">Sam</div><div class="jour-repas">Barbecue</div><div class="jour-qui">ton partenaire 👨</div></div>
         <div class="menu-jour"><div class="jour-label">Dim</div><div class="jour-repas">Blanquette</div><div class="jour-qui">Moi 👩</div></div>
       </div>
     </div>
@@ -3065,7 +3063,7 @@ function assignToPartner(el) {
   el.style.opacity = '0.4';
   el.querySelector('.suggest-btn').textContent = '✓ Assigné !';
   el.querySelector('.suggest-btn').style.background = 'var(--rose)';
-  showToast('✅ Tâche assignée à ' + getPartnerName() + ' — notif envoyée !');
+  showToast('✅ Tâche assignée à ton partenaire — notif envoyée !');
 }
 
 // ── ENFANTS ──
@@ -3751,7 +3749,7 @@ function closeCarte() {
 
 function acceptSuggestion(card) {
   card.classList.add('done');
-  showToast('✓ Tâche transférée à ' + getPartnerName() + ' ! Il sera notifié. 🎉');
+  showToast('✓ Tâche transférée à ton partenaire ! Il sera notifié. 🎉');
   setTimeout(() => card.remove(), 400);
 }
 
@@ -3909,6 +3907,23 @@ function updateAllNames(n1, n2) {
   const code = localStorage.getItem('mdm_couple_code');
   const codeEl = document.getElementById('couple-code');
   if (codeEl && code) codeEl.textContent = code;
+  // Update greeting
+  const greetEl = document.getElementById('greeting-name');
+  if (greetEl) greetEl.textContent = n1 + ' ☀️';
+  // Update partner name in courses
+  const partnerCourses = document.getElementById('partner-name-courses');
+  if (partnerCourses) partnerCourses.textContent = n2;
+  // Score pills
+  const s1 = document.getElementById('score-name1'); if(s1) s1.textContent = n1;
+  const s2 = document.getElementById('score-name2'); if(s2) s2.textContent = n2;
+  // Profil couple
+  const p1 = document.getElementById('profil-name1'); if(p1) p1.textContent = n1;
+  const p2 = document.getElementById('profil-name2'); if(p2) p2.textContent = n2;
+  // Modal who
+  const mp = document.getElementById('modal-name-part'); if(mp) mp.textContent = n2;
+  // Equilibre
+  const e1 = document.getElementById('eq-profile-name1'); if(e1) e1.textContent = n1;
+  const e2 = document.getElementById('eq-profile-name2'); if(e2) e2.textContent = n2;
   // Update couple page dynamic texts
   const inviteTitle = document.getElementById('invite-title');
   if (inviteTitle) inviteTitle.textContent = n2 + " n'a pas encore l'appli";
