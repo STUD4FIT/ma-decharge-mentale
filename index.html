@@ -1097,6 +1097,15 @@
   }
   .suggest-btn:hover { background: #6a8e7e; }
 
+  /* ── DONE SECTION ── */
+  .done-section { margin-top: 16px; }
+  .done-toggle { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--warm); border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 8px; transition: all 0.2s; }
+  .done-toggle:hover { background: var(--blush); color: var(--deep); }
+  .done-arrow { font-size: 16px; }
+  .done-list { animation: fadeUp 0.3s ease both; }
+  .clear-done-btn { width: 100%; margin-top: 8px; padding: 10px; border: none; border-radius: 12px; background: #FFF0EB; color: var(--rose); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .clear-done-btn:hover { background: var(--rose); color: white; }
+
   /* ── SUGGESTIONS ARTICLES ── */
   .suggestions-list { width: 100%; display: flex; flex-direction: column; gap: 6px; }
   .suggestion-item { background: white; border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1.5px solid var(--blush); transition: all 0.2s; animation: fadeUp 0.2s ease both; box-shadow: 0 2px 8px rgba(45,36,32,0.06); }
@@ -1243,6 +1252,150 @@
   window._pwaIcon = dataUrl;
 })();
 </script>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://pbcwxzyzmantjufsasyz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_KUTvoyHXL2f0AEePBTrmdg_wEMv6I2b';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── SYNC SUPABASE ──
+let coupleId = null;
+
+async function initSupabase() {
+  // Check if couple already exists in localStorage
+  coupleId = localStorage.getItem('mdm_couple_id');
+  if (coupleId) {
+    await loadFromSupabase();
+  }
+}
+
+async function createCouple(name1, name2, avatar1, avatar2) {
+  // Generate a unique couple code like MDM-XXXX
+  const code = 'MDM-' + Math.random().toString(36).substr(2,4).toUpperCase();
+  
+  const { data, error } = await supabase
+    .from('couples')
+    .insert({
+      code,
+      name1, name2, avatar1, avatar2,
+      data: JSON.stringify({
+        magasins: {},
+        saisir: [],
+        enfants: [],
+        catalog: [],
+        cartePhotos: {}
+      })
+    })
+    .select()
+    .single();
+    
+  if (error) { console.error('Create couple error:', error); return null; }
+  
+  coupleId = data.id;
+  localStorage.setItem('mdm_couple_id', coupleId);
+  localStorage.setItem('mdm_couple_code', code);
+  
+  // Update code display
+  const codeEl = document.querySelector('.code-value');
+  if (codeEl) codeEl.textContent = code;
+  
+  return data;
+}
+
+async function joinCouple(code) {
+  const { data, error } = await supabase
+    .from('couples')
+    .select('*')
+    .eq('code', code.toUpperCase())
+    .single();
+    
+  if (error || !data) {
+    showToast('❌ Code invalide — vérifie et réessaie');
+    return false;
+  }
+  
+  coupleId = data.id;
+  localStorage.setItem('mdm_couple_id', coupleId);
+  localStorage.setItem('mdm_couple_code', code);
+  localStorage.setItem('mdm_name1', data.name1);
+  localStorage.setItem('mdm_name2', data.name2);
+  localStorage.setItem('mdm_avatar1', data.avatar1);
+  localStorage.setItem('mdm_avatar2', data.avatar2);
+  
+  // Load shared data
+  const shared = JSON.parse(data.data || '{}');
+  if (shared.magasins) Object.assign(magasinsData, shared.magasins);
+  if (shared.saisir) saisirTasks.push(...shared.saisir);
+  if (shared.enfants) enfantsData.push(...shared.enfants);
+  if (shared.catalog) productCatalog.push(...shared.catalog);
+  
+  updateAllNames(data.name1, data.name2);
+  showToast('✅ Connecté au couple de ' + data.name1 + ' !');
+  goTo('dashboard');
+  return true;
+}
+
+async function saveToSupabase() {
+  if (!coupleId) return;
+  
+  const shared = {
+    magasins: magasinsData,
+    saisir: saisirTasks,
+    enfants: enfantsData,
+    catalog: productCatalog,
+    cartePhotos: cartePhotoData
+  };
+  
+  await supabase
+    .from('couples')
+    .update({ data: JSON.stringify(shared), updated_at: new Date().toISOString() })
+    .eq('id', coupleId);
+}
+
+async function loadFromSupabase() {
+  if (!coupleId) return;
+  
+  const { data, error } = await supabase
+    .from('couples')
+    .select('*')
+    .eq('id', coupleId)
+    .single();
+    
+  if (error || !data) return;
+  
+  localStorage.setItem('mdm_name1', data.name1);
+  localStorage.setItem('mdm_name2', data.name2);
+  
+  const shared = JSON.parse(data.data || '{}');
+  if (shared.magasins) Object.assign(magasinsData, shared.magasins);
+  if (shared.saisir && saisirTasks.length === 0) saisirTasks.push(...shared.saisir);
+  if (shared.enfants && enfantsData.length === 0) enfantsData.push(...shared.enfants);
+  if (shared.catalog && productCatalog.length === 0) productCatalog.push(...shared.catalog);
+  
+  updateAllNames(data.name1, data.name2);
+}
+
+// Subscribe to real-time changes
+function subscribeToCouple() {
+  if (!coupleId) return;
+  supabase
+    .channel('couple-changes')
+    .on('postgres_changes', 
+      { event: 'UPDATE', schema: 'public', table: 'couples', filter: `id=eq.${coupleId}` },
+      (payload) => {
+        const shared = JSON.parse(payload.new.data || '{}');
+        if (shared.magasins) Object.assign(magasinsData, shared.magasins);
+        if (shared.saisir) { saisirTasks.length = 0; saisirTasks.push(...shared.saisir); }
+        updateSaisirFab();
+        showToast('🔄 Mis à jour par ' + getPartnerName() + ' !');
+      }
+    )
+    .subscribe();
+}
+</script>
+
 </head>
 <body>
 
@@ -1317,7 +1470,7 @@
       </div>
     </div>
 
-    <button class="btn-primary" onclick="goTo('dashboard')">C'est parti ! →</button>
+    <button class="btn-primary" onclick="goToDashboard()">C'est parti ! →</button>
     <button class="btn-back" onclick="goStep1()">← Retour</button>
   </div>
 </div>
@@ -1325,21 +1478,21 @@
 <!-- ═══════════════════ DASHBOARD ═══════════════════ -->
 <div id="screen-dashboard" class="screen">
   <div class="top-bar">
-    <div class="top-greeting">Bonjour, <span>Sophie</span> ☀️</div>
+    <div class="top-greeting">Bonjour, <span>' + getUserName() + '</span> ☀️</div>
     <div class="top-sub">7 tâches en cours · 2 urgentes</div>
 
     <div class="score-bar">
       <div class="score-pill">
         <span class="emoji">👩</span>
         <div>
-          <div class="name">Sophie</div>
+          <div class="name">' + getUserName() + '</div>
           <div class="val">12 tâches</div>
         </div>
       </div>
       <div class="score-pill">
         <span class="emoji">👨</span>
         <div>
-          <div class="name">Marc</div>
+          <div class="name">' + getPartnerName() + '</div>
           <div class="val">5 tâches</div>
         </div>
       </div>
@@ -1401,55 +1554,16 @@
     </div>
 
     <div class="section-title">Urgentes aujourd'hui</div>
-    <div class="urgent-list">
-      <div class="task-card" style="animation-delay:0.05s">
-        <div class="task-cat-dot dot-enfants"></div>
-        <div class="task-info">
-          <div class="task-title">Spectacle école Emma</div>
-          <div class="task-meta">👶 Enfants · Demain 18h</div>
-        </div>
-        <span class="task-assignee lui">Marc</span>
-        <div class="urgency-dot high"></div>
-      </div>
-      <div class="task-card" style="animation-delay:0.1s">
-        <div class="task-cat-dot dot-courses"></div>
-        <div class="task-info">
-          <div class="task-title">Acheter PQ + lessive</div>
-          <div class="task-meta">🛒 Courses · Aujourd'hui</div>
-        </div>
-        <span class="task-assignee moi">Moi</span>
-        <div class="urgency-dot high"></div>
-      </div>
-      <div class="task-card" style="animation-delay:0.15s">
-        <div class="task-cat-dot dot-factures"></div>
-        <div class="task-info">
-          <div class="task-title">Payer assurance voiture</div>
-          <div class="task-meta">💰 Factures · Dans 3 jours</div>
-        </div>
-        <span class="task-assignee deux">Tous les deux</span>
-        <div class="urgency-dot medium"></div>
+    <div class="urgent-list" id="urgent-list">
+      <div class="empty-state" style="padding:24px;text-align:center;color:var(--muted);font-size:13px">
+        ✨ Aucune tâche urgente — profitez-en !
       </div>
     </div>
 
     <div class="section-title">Récurrentes cette semaine</div>
-    <div class="urgent-list">
-      <div class="task-card" style="animation-delay:0.2s">
-        <div class="task-cat-dot dot-maison"></div>
-        <div class="task-info">
-          <div class="task-title">Poubelle noire</div>
-          <div class="task-meta">🏠 Maison · Dimanche · Chaque semaine</div>
-        </div>
-        <span class="task-assignee lui">Marc</span>
-        <div class="urgency-dot low"></div>
-      </div>
-      <div class="task-card" style="animation-delay:0.25s">
-        <div class="task-cat-dot dot-maison"></div>
-        <div class="task-info">
-          <div class="task-title">Poubelle jaune</div>
-          <div class="task-meta">🏠 Maison · Mardi · 1 semaine / 2</div>
-        </div>
-        <span class="task-assignee lui">Marc</span>
-        <div class="urgency-dot low"></div>
+    <div class="urgent-list" id="recur-list">
+      <div class="empty-state" style="padding:24px;text-align:center;color:var(--muted);font-size:13px">
+        🔁 Aucune tâche récurrente encore — créez-en avec le +
       </div>
     </div>
   </div>
@@ -1497,7 +1611,7 @@
       <div class="eq-profiles">
         <div class="eq-profile">
           <div class="eq-avatar">🧑</div>
-          <div class="eq-name">Sophie</div>
+          <div class="eq-name">' + getUserName() + '</div>
           <div class="eq-count">12 tâches</div>
           <div class="eq-pct" style="color:var(--urgent)">71%</div>
         </div>
@@ -1510,14 +1624,14 @@
         </div>
         <div class="eq-profile">
           <div class="eq-avatar">🧑</div>
-          <div class="eq-name">Marc</div>
+          <div class="eq-name">' + getPartnerName() + '</div>
           <div class="eq-count">5 tâches</div>
           <div class="eq-pct" style="color:var(--sage)">29%</div>
         </div>
       </div>
 
       <div class="eq-message">
-        💬 <em>Sophie porte 71% de la charge cette semaine. L'équilibre idéal serait autour de 50/50.</em>
+        💬 <em>' + getUserName() + ' porte 71% de la charge cette semaine. L'équilibre idéal serait autour de 50/50.</em>
       </div>
     </div>
 
@@ -1531,8 +1645,8 @@
           <div class="mini-bar"><div class="mini-fill" style="width:80%;background:var(--urgent)"></div></div>
         </div>
         <div class="cat-eq-split">
-          <span style="color:var(--urgent)">Sophie 80%</span>
-          <span style="color:var(--muted)"> · Marc 20%</span>
+          <span style="color:var(--urgent)">' + getUserName() + ' 80%</span>
+          <span style="color:var(--muted)"> · ' + getPartnerName() + ' 20%</span>
         </div>
       </div>
       <div class="setting-divider"></div>
@@ -1543,8 +1657,8 @@
           <div class="mini-bar"><div class="mini-fill" style="width:60%;background:#E8A84A"></div></div>
         </div>
         <div class="cat-eq-split">
-          <span style="color:#E8A84A">Sophie 60%</span>
-          <span style="color:var(--muted)"> · Marc 40%</span>
+          <span style="color:#E8A84A">' + getUserName() + ' 60%</span>
+          <span style="color:var(--muted)"> · ' + getPartnerName() + ' 40%</span>
         </div>
       </div>
       <div class="setting-divider"></div>
@@ -1555,8 +1669,8 @@
           <div class="mini-bar"><div class="mini-fill" style="width:30%;background:var(--sage)"></div></div>
         </div>
         <div class="cat-eq-split">
-          <span style="color:var(--sage)">Sophie 30%</span>
-          <span style="color:var(--muted)"> · Marc 70%</span>
+          <span style="color:var(--sage)">' + getUserName() + ' 30%</span>
+          <span style="color:var(--muted)"> · ' + getPartnerName() + ' 70%</span>
         </div>
       </div>
       <div class="setting-divider"></div>
@@ -1578,12 +1692,12 @@
     <div class="suggestion-card" onclick="acceptSuggestion(this)">
       <div class="suggestion-header">
         <div class="suggestion-tag">🛒 Courses & Repas</div>
-        <div class="suggestion-action-label">Transférer à Marc →</div>
+        <div class="suggestion-action-label">Transférer à ' + getPartnerName() + ' →</div>
       </div>
-      <div class="suggestion-title">Confier les courses du week-end à Marc</div>
-      <div class="suggestion-body">Tu fais les courses 4 fois sur 5. Proposer à Marc de prendre le relais le samedi matin libérerait 45min de ta charge hebdomadaire.</div>
+      <div class="suggestion-title">Confier les courses du week-end à ' + getPartnerName() + '</div>
+      <div class="suggestion-body">Tu fais les courses 4 fois sur 5. Proposer à ' + getPartnerName() + ' de prendre le relais le samedi matin libérerait 45min de ta charge hebdomadaire.</div>
       <div class="suggestion-btns">
-        <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Transférer à Marc</button>
+        <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Transférer à ' + getPartnerName() + '</button>
         <button class="sug-btn decline" onclick="declineSuggestion(this.closest('.suggestion-card'))">Pas maintenant</button>
       </div>
     </div>
@@ -1593,10 +1707,10 @@
         <div class="suggestion-tag">👶 Enfants</div>
         <div class="suggestion-action-label">Partager →</div>
       </div>
-      <div class="suggestion-title">Le prochain RDV médecin, c'est Marc qui y va</div>
+      <div class="suggestion-title">Le prochain RDV médecin, c'est ' + getPartnerName() + ' qui y va</div>
       <div class="suggestion-body">Tu gères 100% des rendez-vous médicaux. Une fois sur deux suffirait à alléger ta charge mentale sans tout bouleverser.</div>
       <div class="suggestion-btns">
-        <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Créer le rappel pour Marc</button>
+        <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Créer le rappel pour ' + getPartnerName() + '</button>
         <button class="sug-btn decline" onclick="declineSuggestion(this.closest('.suggestion-card'))">Pas maintenant</button>
       </div>
     </div>
@@ -1606,7 +1720,7 @@
         <div class="suggestion-tag">🍽️ Repas</div>
         <div class="suggestion-action-label">Partager →</div>
       </div>
-      <div class="suggestion-title">1 soir sur 2, c'est Marc qui décide du repas</div>
+      <div class="suggestion-title">1 soir sur 2, c'est ' + getPartnerName() + ' qui décide du repas</div>
       <div class="suggestion-body">Le "qu'est-ce qu'on mange ?" quotidien pèse lourd. Alterner la décision enlève cette micro-charge qui s'accumule.</div>
       <div class="suggestion-btns">
         <button class="sug-btn accept" onclick="acceptSuggestion(this.closest('.suggestion-card'))">✓ Ajouter la règle</button>
@@ -1691,7 +1805,7 @@
           <span class="notif-time">maintenant</span>
         </div>
         <div class="notif-title-text">🔴 Urgent — Spectacle école Emma</div>
-        <div class="notif-body-text">Demain 18h · Attribuée à Marc · Pas encore fait ✗</div>
+        <div class="notif-body-text">Demain 18h · Attribuée à ' + getPartnerName() + ' · Pas encore fait ✗</div>
       </div>
       <div class="notif-preview notif-preview-normal" id="notif-preview-normal">
         <div class="notif-app-row">
@@ -1765,7 +1879,7 @@
       <div class="setting-row" style="flex-direction:column; align-items:flex-start; gap:12px;">
         <div class="setting-info">
           <div class="setting-label">Heure du partenaire</div>
-          <div class="setting-sub">Marc reçoit ses notifs à</div>
+          <div class="setting-sub">' + getPartnerName() + ' reçoit ses notifs à</div>
         </div>
         <div class="time-slots">
           <div class="time-slot" onclick="selectTime(this)">7h00</div>
@@ -1785,7 +1899,7 @@
         <div class="recur-dot" style="background:var(--rose)"></div>
         <div class="recur-info">
           <div class="setting-label">Poubelle noire</div>
-          <div class="setting-sub">Dimanche · Marc · Chaque semaine</div>
+          <div class="setting-sub">Dimanche · ' + getPartnerName() + ' · Chaque semaine</div>
         </div>
         <div class="recur-badge">Sam 18h</div>
       </div>
@@ -1794,7 +1908,7 @@
         <div class="recur-dot" style="background:var(--sage)"></div>
         <div class="recur-info">
           <div class="setting-label">Poubelle jaune</div>
-          <div class="setting-sub">Mardi · Marc · 1 sem / 2</div>
+          <div class="setting-sub">Mardi · ' + getPartnerName() + ' · 1 sem / 2</div>
         </div>
         <div class="recur-badge">Lun 18h</div>
       </div>
@@ -1835,7 +1949,7 @@
       <div class="eq-avatars">
         <div class="eq-avatar-block">
           <div class="eq-avatar">🧑</div>
-          <div class="eq-name">Sophie</div>
+          <div class="eq-name">' + getUserName() + '</div>
           <div class="eq-score" style="color:var(--rose)">68%</div>
           <div class="eq-tasks">12 tâches</div>
         </div>
@@ -1845,7 +1959,7 @@
         </div>
         <div class="eq-avatar-block">
           <div class="eq-avatar">🧑</div>
-          <div class="eq-name">Marc</div>
+          <div class="eq-name">' + getPartnerName() + '</div>
           <div class="eq-score" style="color:var(--sage)">32%</div>
           <div class="eq-tasks">5 tâches</div>
         </div>
@@ -1858,13 +1972,13 @@
           <div class="eq-bar-marc" style="width:32%"></div>
         </div>
         <div class="eq-bar-labels">
-          <span style="color:var(--rose)">Sophie 68%</span>
-          <span style="color:var(--sage)">Marc 32%</span>
+          <span style="color:var(--rose)">' + getUserName() + ' 68%</span>
+          <span style="color:var(--sage)">' + getPartnerName() + ' 32%</span>
         </div>
       </div>
 
       <div class="eq-tip">
-        💡 Si Marc prenait 3 tâches de plus, vous seriez à l'équilibre
+        💡 Si ' + getPartnerName() + ' prenait 3 tâches de plus, vous seriez à l'équilibre
       </div>
     </div>
 
@@ -1987,11 +2101,11 @@
           </div>
         </div>
         <div class="chart-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--rose)"></div> Sophie</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--sage)"></div> Marc</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--rose)"></div> ' + getUserName() + '</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--sage)"></div> ' + getPartnerName() + '</div>
         </div>
       </div>
-      <div class="eq-tip" style="margin-top:8px">📈 Marc a pris 4% de plus cette semaine — bonne direction !</div>
+      <div class="eq-tip" style="margin-top:8px">📈 ' + getPartnerName() + ' a pris 4% de plus cette semaine — bonne direction !</div>
     </div>
 
     <!-- Suggestion IA -->
@@ -1999,31 +2113,31 @@
     <div class="ia-suggest-card">
       <div class="ia-icon">🧠</div>
       <div class="ia-text">
-        <div class="ia-title">3 tâches à redistribuer à Marc</div>
+        <div class="ia-title">3 tâches à redistribuer à ' + getPartnerName() + '</div>
         <div class="ia-sub">Pour atteindre 55% / 45% cette semaine</div>
       </div>
     </div>
     <div class="suggest-list">
-      <div class="suggest-task" onclick="assignToMarc(this)">
+      <div class="suggest-task" onclick="assignToPartner(this)">
         <div class="suggest-info">
           <div class="suggest-title">🛒 Commander eau pétillante</div>
           <div class="suggest-meta">Courses · Pas urgent</div>
         </div>
-        <button class="suggest-btn">Donner à Marc →</button>
+        <button class="suggest-btn">Donner à ' + getPartnerName() + ' →</button>
       </div>
-      <div class="suggest-task" onclick="assignToMarc(this)">
+      <div class="suggest-task" onclick="assignToPartner(this)">
         <div class="suggest-info">
           <div class="suggest-title">💰 Payer assurance voiture</div>
           <div class="suggest-meta">Factures · Dans 3 jours</div>
         </div>
-        <button class="suggest-btn">Donner à Marc →</button>
+        <button class="suggest-btn">Donner à ' + getPartnerName() + ' →</button>
       </div>
-      <div class="suggest-task" onclick="assignToMarc(this)">
+      <div class="suggest-task" onclick="assignToPartner(this)">
         <div class="suggest-info">
           <div class="suggest-title">🔧 Contacter voisin pour le mur</div>
           <div class="suggest-meta">Divers · Normal</div>
         </div>
-        <button class="suggest-btn">Donner à Marc →</button>
+        <button class="suggest-btn">Donner à ' + getPartnerName() + ' →</button>
       </div>
     </div>
 
@@ -2143,14 +2257,14 @@
     <div class="couple-profils">
       <div class="profil-card moi-card">
         <div class="profil-avatar">🧑</div>
-        <div class="profil-name">Sophie</div>
+        <div class="profil-name">' + getUserName() + '</div>
         <div class="profil-role">Administratrice</div>
         <div class="profil-stats">12 tâches · 71% de charge</div>
       </div>
       <div class="profil-coeur">💛</div>
       <div class="profil-card lui-card">
         <div class="profil-avatar">🧑</div>
-        <div class="profil-name">Marc</div>
+        <div class="profil-name">' + getPartnerName() + '</div>
         <div class="profil-role">Partenaire</div>
         <div class="profil-stats">5 tâches · 29% de charge</div>
       </div>
@@ -2161,7 +2275,7 @@
     <div class="invite-card">
       <div class="invite-icon">📲</div>
       <div class="invite-text">
-        <div class="invite-title">Marc n'a pas encore l'appli</div>
+        <div class="invite-title">' + getPartnerName() + ' n\'a pas encore l\'appli</div>
         <div class="invite-sub">Envoie-lui une invitation pour qu'il reçoive ses notifications</div>
       </div>
     </div>
@@ -2181,7 +2295,7 @@
     <div class="code-invite">
       <div class="code-label">Code d'invitation</div>
       <div class="code-value">MDM-4829</div>
-      <div class="code-sub">Marc entre ce code à son inscription</div>
+      <div class="code-sub">' + getPartnerName() + ' entre ce code à son inscription</div>
     </div>
 
     <!-- Paramètres du couple -->
@@ -2190,7 +2304,7 @@
       <div class="setting-row">
         <div class="setting-info">
           <div class="setting-label">Tableau d'équilibre visible</div>
-          <div class="setting-sub">Marc peut voir la répartition des tâches</div>
+          <div class="setting-sub">' + getPartnerName() + ' peut voir la répartition des tâches</div>
         </div>
         <div class="toggle active" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
       </div>
@@ -2307,7 +2421,7 @@
           </div>
           <div class="who-btn" onclick="selectWho(this,'partenaire')">
             <div class="who-avatar" id="modal-avatar-part">🧑</div>
-            <div class="who-name" id="modal-name-part">Marc</div>
+            <div class="who-name" id="modal-name-part">' + getPartnerName() + '</div>
           </div>
           <div class="who-btn" onclick="selectWho(this,'deux')">
             <div class="who-avatar">👫</div>
@@ -2399,7 +2513,7 @@
   <div class="top-bar">
     <button class="back-btn" onclick="goTo('dashboard')" style="margin-bottom:12px">←</button>
     <div class="top-greeting">🛒 Courses <span>& Repas</span></div>
-    <div class="top-sub">Partagé avec Marc · Mis à jour à l'instant</div>
+    <div class="top-sub">Partagé avec ' + getPartnerName() + ' · Mis à jour à l'instant</div>
   </div>
 
   <div class="dashboard-body">
@@ -2422,8 +2536,7 @@
 
       <!-- Listes par magasin -->
       <div class="magasins-list" id="magasins-list">
-        <div class="magasin-card" onclick="openMagasin('leclerc')">
-          <div class="magasin-color" style="background:#0052A5"></div>
+      </div>
           <div class="magasin-emoji">🟦</div>
           <div class="magasin-info">
             <div class="magasin-name">Leclerc</div>
@@ -2517,12 +2630,12 @@
 
       <div class="section-title">Menu de la semaine</div>
       <div class="menu-semaine">
-        <div class="menu-jour"><div class="jour-label">Lun</div><div class="jour-repas">Pâtes carbonara</div><div class="jour-qui">Marc 👨</div></div>
+        <div class="menu-jour"><div class="jour-label">Lun</div><div class="jour-repas">Pâtes carbonara</div><div class="jour-qui">' + getPartnerName() + ' 👨</div></div>
         <div class="menu-jour"><div class="jour-label">Mar</div><div class="jour-repas">Poulet rôti</div><div class="jour-qui">Moi 👩</div></div>
         <div class="menu-jour today-menu"><div class="jour-label">Mer ✦</div><div class="jour-repas">À définir…</div><div class="jour-qui">—</div></div>
-        <div class="menu-jour"><div class="jour-label">Jeu</div><div class="jour-repas">Soupe + pain</div><div class="jour-qui">Marc 👨</div></div>
+        <div class="menu-jour"><div class="jour-label">Jeu</div><div class="jour-repas">Soupe + pain</div><div class="jour-qui">' + getPartnerName() + ' 👨</div></div>
         <div class="menu-jour"><div class="jour-label">Ven</div><div class="jour-repas">Pizza maison</div><div class="jour-qui">Tous 👫</div></div>
-        <div class="menu-jour"><div class="jour-label">Sam</div><div class="jour-repas">Barbecue</div><div class="jour-qui">Marc 👨</div></div>
+        <div class="menu-jour"><div class="jour-label">Sam</div><div class="jour-repas">Barbecue</div><div class="jour-qui">' + getPartnerName() + ' 👨</div></div>
         <div class="menu-jour"><div class="jour-label">Dim</div><div class="jour-repas">Blanquette</div><div class="jour-qui">Moi 👩</div></div>
       </div>
     </div>
@@ -2692,32 +2805,85 @@ const categories = {
   courses: { icon: '🛒', name: 'Courses & Repas', tasks: [
     { title: 'Acheter PQ + lessive', who: 'Moi', urgency: 'high', recur: 'Une fois' },
     { title: 'Menu de la semaine', who: 'Moi', urgency: 'medium', recur: 'Chaque semaine' },
-    { title: 'Commander eau pétillante', who: 'Marc', urgency: 'low', recur: 'Une fois' },
+    { title: 'Commander eau pétillante', who: getPartnerName(), urgency: 'low', recur: 'Une fois' },
   ]},
   factures: { icon: '💰', name: 'Factures & Admin', tasks: [
     { title: 'Payer assurance voiture', who: 'Tous les deux', urgency: 'medium', recur: 'Une fois' },
   ]},
   enfants: { icon: '👶', name: 'Enfants', tasks: [
-    { title: 'Spectacle école Emma', who: 'Marc', urgency: 'high', recur: 'Une fois' },
+    { title: 'Spectacle école Emma', who: getPartnerName(), urgency: 'high', recur: 'Une fois' },
     { title: 'RDV pédiatre Lucas', who: 'Moi', urgency: 'medium', recur: 'Une fois' },
   ]},
   maison: { icon: '🏠', name: 'Maison', tasks: [
-    { title: 'Poubelle noire', who: 'Marc', urgency: 'low', recur: 'Chaque semaine' },
-    { title: 'Poubelle jaune', who: 'Marc', urgency: 'low', recur: '1 sem / 2' },
+    { title: 'Poubelle noire', who: getPartnerName(), urgency: 'low', recur: 'Chaque semaine' },
+    { title: 'Poubelle jaune', who: getPartnerName(), urgency: 'low', recur: '1 sem / 2' },
   ]},
   voiture: { icon: '🚗', name: 'Voiture', tasks: [] },
   social: { icon: '❤️', name: 'Famille & Social', tasks: [] },
   divers: { icon: '🔧', name: 'Divers', tasks: [
-    { title: 'Contacter voisin pour le mur', who: 'Marc', urgency: 'medium', recur: 'Une fois' },
+    { title: 'Contacter voisin pour le mur', who: getPartnerName(), urgency: 'medium', recur: 'Une fois' },
   ]},
 };
 
 let currentCat = null;
 
+
+// ── NOMS DYNAMIQUES ──
+function getUserName() {
+  try { return localStorage.getItem('mdm_name1') || 'Moi'; } catch(e) { return 'Moi'; }
+}
+function getPartnerName() {
+  try { return localStorage.getItem('mdm_name2') || 'Mon partenaire'; } catch(e) { return 'Mon partenaire'; }
+}
+function getUserAvatar() {
+  try { return localStorage.getItem('mdm_avatar1') || '🧑'; } catch(e) { return '🧑'; }
+}
+function getPartnerAvatar() {
+  try { return localStorage.getItem('mdm_avatar2') || '🧑'; } catch(e) { return '🧑'; }
+}
+
+// ── SAUVEGARDE AUTOMATIQUE ──
+function saveAll() {
+  try {
+    localStorage.setItem('mdm_magasins', JSON.stringify(magasinsData));
+    localStorage.setItem('mdm_catalog', JSON.stringify(productCatalog));
+    localStorage.setItem('mdm_saisir', JSON.stringify(saisirTasks));
+    localStorage.setItem('mdm_enfants', JSON.stringify(enfantsData));
+    localStorage.setItem('mdm_cartePhotos', JSON.stringify(cartePhotoData));
+  } catch(e) { console.log('Save error:', e); }
+  // Sync to Supabase
+  saveToSupabase();
+}
+
+function loadAll() {
+  try {
+    const mag = localStorage.getItem('mdm_magasins');
+    if (mag) Object.assign(magasinsData, JSON.parse(mag));
+    
+    const cat = localStorage.getItem('mdm_catalog');
+    if (cat) productCatalog.push(...JSON.parse(cat));
+    
+    const saisir = localStorage.getItem('mdm_saisir');
+    if (saisir) saisirTasks.push(...JSON.parse(saisir));
+    
+    const enf = localStorage.getItem('mdm_enfants');
+    if (enf) enfantsData.push(...JSON.parse(enf));
+
+    const cartes = localStorage.getItem('mdm_cartePhotos');
+    if (cartes) Object.assign(cartePhotoData, JSON.parse(cartes));
+  } catch(e) { console.log('Load error:', e); }
+}
+
+// Auto-save toutes les 30 secondes
+setInterval(saveAll, 30000);
+
 function goTo(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const target = document.getElementById('screen-' + screenId);
   if (target) target.classList.add('active');
+  if (screenId === 'courses') {
+    renderMagasinList();
+  }
   if (screenId === 'enfants') {
     currentEnfantSection = 'agenda';
     setTimeout(renderEnfantContent, 50);
@@ -2755,6 +2921,7 @@ function goStep2() {
     localStorage.setItem('mdm_avatar1', avatar1);
     localStorage.setItem('mdm_avatar2', avatar2);
   } catch(e) {}
+  updateAllNames(n1, n2);
   document.getElementById('step-1').classList.remove('active-step');
   document.getElementById('step-2').classList.add('active-step');
 }
@@ -2769,6 +2936,17 @@ function selectManage(el) {
   el.classList.add('selected');
 }
 
+async function goToDashboard() {
+  const n1 = localStorage.getItem('mdm_name1');
+  const n2 = localStorage.getItem('mdm_name2');
+  const a1 = localStorage.getItem('mdm_avatar1');
+  const a2 = localStorage.getItem('mdm_avatar2');
+  // Create couple in Supabase
+  await createCouple(n1, n2, a1, a2);
+  subscribeToCouple();
+  goTo('dashboard');
+}
+
 function openCategory(catId) {
   if (catId === 'courses') { goTo('courses'); return; }
   currentCat = catId;
@@ -2780,7 +2958,7 @@ function openCategory(catId) {
   if (cat.tasks.length === 0) {
     body.innerHTML = `<div class="empty-state"><div class="big">✨</div><p>Aucune tâche ici pour l'instant.<br>Profitez-en !</p></div>`;
   } else {
-    const whoClass = { 'Moi': 'moi', 'Marc': 'lui', 'Tous les deux': 'deux' };
+    const whoClass = { 'Moi': 'moi', getPartnerName(): 'lui', 'Tous les deux': 'deux' };
     const urgDot = { high: 'high', medium: 'medium', low: 'low' };
     body.innerHTML = `<div class="section-title" style="margin-top:16px">${cat.tasks.length} tâche${cat.tasks.length > 1 ? 's' : ''}</div><div class="urgent-list">` +
       cat.tasks.map((t, i) => `
@@ -2860,7 +3038,7 @@ function updateSummary() {
   const desc = document.getElementById('task-desc').value || '—';
   const urgLabels = { high: '🔴 Urgent', medium: '🟡 Normal', low: '🟢 Pas pressé' };
   const recurLabels = { once: 'Une fois', weekly: 'Chaque semaine', biweekly: '1 sem / 2', monthly: 'Chaque mois' };
-  const whoLabels = { moi: 'Moi', partenaire: 'Marc', deux: 'Tous les deux' };
+  const whoLabels = { moi: 'Moi', partenaire: getPartnerName(), deux: 'Tous les deux' };
   document.getElementById('sum-desc').textContent = desc;
   document.getElementById('sum-cat').textContent = modalData.catIcon + ' ' + (modalData.catName || '—');
   document.getElementById('sum-who').textContent = whoLabels[modalData.who] || '—';
@@ -2874,13 +3052,14 @@ function submitTask() {
   if (!modalData.cat) { showToast('⚠️ Choisis une catégorie !'); return; }
   closeModal();
   showToast('🎉 Tâche ajoutée ! Notification envoyée. 🔔');
+  saveAll();
 }
 
-function assignToMarc(el) {
+function assignToPartner(el) {
   el.style.opacity = '0.4';
   el.querySelector('.suggest-btn').textContent = '✓ Assigné !';
   el.querySelector('.suggest-btn').style.background = 'var(--rose)';
-  showToast('✅ Tâche assignée à Marc — notif envoyée !');
+  showToast('✅ Tâche assignée à ' + getPartnerName() + ' — notif envoyée !');
 }
 
 // ── ENFANTS ──
@@ -2888,57 +3067,7 @@ let selectedEnfantEmoji = '👧';
 let currentEnfantIndex = 0;
 let currentEnfantSection = 'agenda';
 
-const enfantsData = [
-  {
-    name: 'Emma', avatar: '👧', age: '8 ans',
-    agenda: [
-      { name: 'Spectacle de danse', date: 'Demain 18h', qui: 'lui', dot: '#C4715A' },
-      { name: 'Sortie scolaire zoo', date: 'Vendredi 8h', qui: 'moi', dot: '#7A9E8E' },
-      { name: 'Cours de piano', date: 'Mercredi 17h · Récurrent', qui: 'lui', dot: '#8B70B5' },
-      { name: 'RDV orthodontiste', date: '28 juin 14h', qui: 'moi', dot: '#C49A44' },
-    ],
-    sante: {
-      tailles: { vetements: '134 cm', chaussures: '33', poids: '27 kg', updated: 'Mars 2026' },
-      vaccins: [
-        { name: 'DTPolio rappel', date: 'Fait — Jan 2025', done: true },
-        { name: 'ROR rappel', date: 'Fait — Jan 2025', done: true },
-        { name: 'Prochain bilan', date: 'À planifier — 9 ans', done: false },
-      ],
-      medicaments: [
-        { name: 'Doliprane 250mg', dose: 'Si fièvre · max 4x/jour' },
-        { name: 'Aerius 0.5mg/ml', dose: 'Allergie printanière · 1 cuil/jour' },
-      ]
-    },
-    social: [
-      { name: 'Inès', avatar: '👧🏽', date: '15 juillet', countdown: '31 jours', soon: false },
-      { name: 'Zoé', avatar: '👧', date: '3 juillet', countdown: '19 jours', soon: false },
-      { name: 'Camille', avatar: '👧', date: '22 juin', countdown: '8 jours', soon: true },
-    ]
-  },
-  {
-    name: 'Lucas', avatar: '👦', age: '5 ans',
-    agenda: [
-      { name: 'Fête de l\'école', date: 'Samedi 10h', qui: 'moi', dot: '#C4715A' },
-      { name: 'Football entraînement', date: 'Jeudi 17h · Récurrent', qui: 'lui', dot: '#7A9E8E' },
-      { name: 'RDV pédiatre', date: '2 juillet 10h30', qui: 'moi', dot: '#C49A44' },
-    ],
-    sante: {
-      tailles: { vetements: '110 cm', chaussures: '27', poids: '18 kg', updated: 'Avril 2026' },
-      vaccins: [
-        { name: 'Pentavalent rappel', date: 'Fait — Sept 2024', done: true },
-        { name: 'ROR 2ème dose', date: 'Fait — Sept 2024', done: true },
-        { name: 'Rappel 6 ans', date: 'À planifier — 2027', done: false },
-      ],
-      medicaments: [
-        { name: 'Doliprane 150mg', dose: 'Si fièvre · max 4x/jour' },
-      ]
-    },
-    social: [
-      { name: 'Hugo', avatar: '👦🏽', date: '8 juillet', countdown: '24 jours', soon: false },
-      { name: 'Mathis', avatar: '👦', date: '19 juin', countdown: '5 jours', soon: true },
-    ]
-  }
-];
+const enfantsData = [];
 
 function selectEnfant(el, index) {
   document.querySelectorAll('.enfant-tab:not(.add-enfant-tab)').forEach(t => t.classList.remove('active'));
@@ -3016,7 +3145,7 @@ function renderEnfantSection(e) {
             <div class="enfant-event-name">${ev.name}</div>
             <div class="enfant-event-meta">${ev.date}</div>
           </div>
-          <span class="enfant-event-qui ${ev.qui}">${ev.qui === 'moi' ? 'Moi' : 'Marc'}</span>
+          <span class="enfant-event-qui ${ev.qui}">${ev.qui === 'moi' ? 'Moi' : getPartnerName()}</span>
         </div>
       `).join('')}
       <button class="btn-submit" style="margin-top:8px" onclick="showToast('➕ Ajouter un événement pour ${e.name}')">+ Ajouter un événement</button>
@@ -3136,24 +3265,14 @@ function addEnfant() {
   document.getElementById('new-enfant-age').value = '';
   selectEnfant(newTab, enfantsData.length - 1);
   showToast('🎉 ' + name + ' ajouté(e) !');
+  saveAll();
 }
 
 // Init enfants on screen load
 document.getElementById('screen-enfants').addEventListener('transitionend', () => {});
 
 // ── CATALOGUE PRODUITS (historique intelligent) ──
-let productCatalog = [
-  { name: 'Riz basmati Uncle Ben\'s', photo: null, magasin: 'Leclerc' },
-  { name: 'Sauce tomate Mutti', photo: null, magasin: 'Leclerc' },
-  { name: 'Lessive Ariel', photo: null, magasin: 'Lidl' },
-  { name: 'PQ Lotus', photo: null, magasin: 'Lidl' },
-  { name: 'Yaourts Danone', photo: null, magasin: 'Leclerc' },
-  { name: 'Eau pétillante Badoit', photo: null, magasin: 'Auchan' },
-  { name: 'Pain de mie Harry\'s', photo: null, magasin: 'Leclerc' },
-  { name: 'Nutella', photo: null, magasin: 'Leclerc' },
-  { name: 'Jus d\'orange Tropicana', photo: null, magasin: 'Auchan' },
-  { name: 'Camembert President', photo: null, magasin: 'Lidl' },
-];
+let productCatalog = [];
 
 function showSuggestions(val) {
   const box = document.getElementById('article-suggestions');
@@ -3193,24 +3312,35 @@ function selectSuggestion(name, catalogIdx) {
   showToast('✓ ' + name + ' ajouté !');
 }
 
+function renderMagasinList() {
+  const list = document.getElementById('magasins-list');
+  if (!list) return;
+  const keys = Object.keys(magasinsData);
+  if (keys.length === 0) {
+    list.innerHTML = `<div class="empty-state" style="padding:32px;text-align:center">
+      <div style="font-size:40px;margin-bottom:10px">🛒</div>
+      <div style="font-size:14px;font-weight:500;color:var(--deep);margin-bottom:6px">Aucune liste encore</div>
+      <div style="font-size:12px;color:var(--muted)">Créez votre première liste magasin !</div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = keys.map(id => {
+    const mag = magasinsData[id];
+    const count = mag.items ? mag.items.filter(i => !i.done).length : 0;
+    return `<div class="magasin-card" onclick="openMagasin('${id}')">
+      <div class="magasin-color" style="background:${mag.color || '#8C7B74'}"></div>
+      <div class="magasin-emoji">${mag.emoji}</div>
+      <div class="magasin-info">
+        <div class="magasin-name">${mag.name}</div>
+        <div class="magasin-count">${count} article${count > 1 ? 's' : ''}</div>
+      </div>
+      <div class="magasin-arrow">›</div>
+    </div>`;
+  }).join('');
+}
+
 // ── LISTES PAR MAGASIN ──
-const magasinsData = {
-  leclerc: { name: 'Leclerc', emoji: '🟦', color: '#0052A5', items: [
-    { name: 'Sauce tomate × 3', done: false },
-    { name: 'Yaourts enfants', done: false },
-    { name: 'Pain de mie', done: true },
-  ]},
-  lidl: { name: 'Lidl', emoji: '🟡', color: '#FFD700', items: [
-    { name: 'PQ × 12', done: false },
-    { name: 'Lessive', done: false },
-  ]},
-  auchan: { name: 'Auchan', emoji: '🟠', color: '#E2001A', items: [
-    { name: 'Cartouches imprimante HP', done: false },
-  ]},
-  autre: { name: 'Autre', emoji: '🔧', color: '#8C7B74', items: [
-    { name: 'Eau pétillante × 6', done: false },
-  ]},
-};
+const magasinsData = {};
 
 let currentMagasin = null;
 let selectedListeEmoji = '🛒';
@@ -3228,12 +3358,70 @@ function openMagasin(id) {
 function renderMagasinItems() {
   const mag = magasinsData[currentMagasin];
   const list = document.getElementById('magasin-items-list');
-  list.innerHTML = mag.items.map((item, i) => `
+  
+  const todoItems = mag.items.filter((item, i) => !item.done).map((item, _) => {
+    const i = mag.items.indexOf(item);
+    return renderMagasinItem(item, i);
+  });
+  
+  const doneItems = mag.items.filter((item, i) => item.done).map((item, _) => {
+    const i = mag.items.indexOf(item);
+    return renderMagasinItem(item, i);
+  });
+
+  const doneSection = doneItems.length > 0 ? `
+    <div class="done-section">
+      <div class="done-toggle" onclick="toggleDoneSection(this)">
+        <span>✓ Déjà acheté (${doneItems.length})</span>
+        <span class="done-arrow">▾</span>
+      </div>
+      <div class="done-list">
+        ${doneItems.join('')}
+        <button class="clear-done-btn" onclick="clearDoneItems()">🗑️ Vider la liste des achats</button>
+      </div>
+    </div>
+  ` : '';
+
+  const emptyTodo = todoItems.length === 0 ? `
+    <div class="empty-state" style="padding:24px;text-align:center;color:var(--muted);font-size:13px">
+      ✅ Tout est acheté !
+    </div>
+  ` : '';
+
+  list.innerHTML = todoItems.join('') + emptyTodo + doneSection;
+}
+
+function renderMagasinItem(item, i) {
+  const photoHtml = item.photo 
+    ? `<img src="${item.photo}" class="course-photo" onclick="event.stopPropagation();showPhotoZoom('${item.photo}')">`
+    : `<div class="course-photo-placeholder" onclick="event.stopPropagation();addPhotoToItem(${i})">📷</div>`;
+  
+  return `
     <div class="course-item ${item.done ? 'course-done' : ''}" onclick="toggleMagasinItem(${i})">
       <div class="course-check ${item.done ? 'course-checked' : ''}">${item.done ? '✓' : '○'}</div>
-      ${item.photo ? `<img src="${item.photo}" class="course-photo" onclick="event.stopPropagation();showPhotoZoom('${item.photo}')">` : `<div class="course-photo-placeholder" onclick="event.stopPropagation();addPhotoToItem(${i})">📷</div>`}
+      ${photoHtml}
       <div class="course-info">
         <div class="course-name" style="${item.done ? 'text-decoration:line-through;color:var(--muted)' : ''}">${item.name}</div>
+        <div class="course-meta">${magasinsData[currentMagasin].emoji} ${magasinsData[currentMagasin].name}</div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleDoneSection(el) {
+  const list = el.nextElementSibling;
+  const arrow = el.querySelector('.done-arrow');
+  const isOpen = list.style.display !== 'none';
+  list.style.display = isOpen ? 'none' : 'block';
+  arrow.textContent = isOpen ? '▸' : '▾';
+}
+
+function clearDoneItems() {
+  magasinsData[currentMagasin].items = magasinsData[currentMagasin].items.filter(i => !i.done);
+  renderMagasinItems();
+  saveAll();
+  showToast('🗑️ Liste des achats vidée !');
+}tem.done ? 'text-decoration:line-through;color:var(--muted)' : ''}">${item.name}</div>
         <div class="course-meta">${mag.emoji} ${mag.name}</div>
       </div>
     </div>
@@ -3242,8 +3430,10 @@ function renderMagasinItems() {
 
 function toggleMagasinItem(i) {
   magasinsData[currentMagasin].items[i].done = !magasinsData[currentMagasin].items[i].done;
+  const isDone = magasinsData[currentMagasin].items[i].done;
+  saveAll();
   renderMagasinItems();
-  showToast(magasinsData[currentMagasin].items[i].done ? '✓ Article coché !' : 'Article décoché');
+  showToast(isDone ? '✓ Article coché — déplacé en bas !' : 'Article remis dans la liste !');
 }
 
 function addMagasinArticle() {
@@ -3261,6 +3451,7 @@ function addMagasinArticle() {
   input.value = '';
   document.getElementById('article-suggestions').style.display = 'none';
   showToast('✓ Article ajouté à ' + magasinsData[currentMagasin].name + ' !');
+  saveAll();
 }
 
 function closeMagasin() {
@@ -3289,19 +3480,10 @@ function createListe() {
   if (!name) { showToast('⚠️ Donne un nom au magasin !'); return; }
   const id = name.toLowerCase().replace(/\s/g, '_') + '_' + Date.now();
   magasinsData[id] = { name, emoji: selectedListeEmoji, color: '#8C7B74', items: [] };
-  const list = document.getElementById('magasins-list');
-  const card = document.createElement('div');
-  card.className = 'magasin-card';
-  card.onclick = () => openMagasin(id);
-  card.innerHTML = `
-    <div class="magasin-color" style="background:#8C7B74"></div>
-    <div class="magasin-emoji">${selectedListeEmoji}</div>
-    <div class="magasin-info"><div class="magasin-name">${name}</div><div class="magasin-count">0 article</div></div>
-    <div class="magasin-arrow">›</div>
-  `;
-  list.appendChild(card);
+  renderMagasinList();
   closeAddListe();
   document.getElementById('new-liste-name').value = '';
+  saveAll();
   showToast('🎉 Liste "' + name + '" créée !');
 }
 
@@ -3531,6 +3713,12 @@ function generateQR(text) {
   }
 }
 
+async function joinWithCode() {
+  const code = document.getElementById('join-code-input').value.trim();
+  if (!code) { showToast('⚠️ Entre le code !'); return; }
+  await joinCouple(code);
+}
+
 function showCarte(name, num, label, color) {
   document.getElementById('carte-display-name').textContent = label;
   document.getElementById('carte-display-num').textContent = num;
@@ -3557,7 +3745,7 @@ function closeCarte() {
 
 function acceptSuggestion(card) {
   card.classList.add('done');
-  showToast('✓ Tâche transférée à Marc ! Il sera notifié. 🎉');
+  showToast('✓ Tâche transférée à ' + getPartnerName() + ' ! Il sera notifié. 🎉');
   setTimeout(() => card.remove(), 400);
 }
 
@@ -3581,11 +3769,7 @@ function saveNotifs() {
 }
 
 // ── À SAISIR ──
-let saisirTasks = [
-  { name: 'Changer les piles de la télécommande', cat: '🔧 Divers' },
-  { name: 'Rappeler le plombier', cat: '🏠 Maison' },
-  { name: 'Commander les cartouches d\'encre', cat: '🚗 Voiture' },
-];
+let saisirTasks = [];
 let pendingPhotoItemIndex = null;
 
 function updateSaisirFab() {
@@ -3644,6 +3828,7 @@ function addSaisirTask() {
   renderSaisirList();
   updateSaisirFab();
   showToast('✓ Tâche ajoutée à la liste libre !');
+  saveAll();
 }
 
 // ── PHOTO PRODUIT ──
@@ -3688,14 +3873,14 @@ function showPhotoZoom(src) {
 // goTo unified above
 
 // Init — restore from localStorage
-function initApp() {
+async function initApp() {
+  loadAll();
   try {
     const n1 = localStorage.getItem('mdm_name1');
     const n2 = localStorage.getItem('mdm_name2');
     const a1 = localStorage.getItem('mdm_avatar1');
     const a2 = localStorage.getItem('mdm_avatar2');
     if (n1 && n2) {
-      // Restore profile
       document.getElementById('name-1').value = n1;
       document.getElementById('name-2').value = n2;
       avatar1 = a1 || '🧑';
@@ -3704,13 +3889,48 @@ function initApp() {
       document.getElementById('manage-label-2').textContent = n2;
       document.getElementById('manage-emoji-1').textContent = avatar1;
       document.getElementById('manage-emoji-2').textContent = avatar2;
-      // Update dashboard greeting
-      document.querySelector('.top-greeting span').textContent = n1 + ' ☀️';
-      // Go straight to dashboard
+      // Update all partner name displays
+      updateAllNames(n1, n2);
+      await initSupabase();
+      subscribeToCouple();
       goTo('dashboard');
       return;
     }
   } catch(e) {}
+}
+
+function updateAllNames(n1, n2) {
+  // Update couple code display
+  const code = localStorage.getItem('mdm_couple_code');
+  const codeEl = document.getElementById('couple-code');
+  if (codeEl && code) codeEl.textContent = code;
+  // Update couple page dynamic texts
+  const inviteTitle = document.getElementById('invite-title');
+  if (inviteTitle) inviteTitle.textContent = n2 + " n'a pas encore l'appli";
+  const codeSub = document.getElementById('code-sub');
+  if (codeSub) codeSub.textContent = n2 + ' entre ce code à son inscription';
+  const partnerBalanceSub = document.getElementById('partner-balance-sub');
+  if (partnerBalanceSub) partnerBalanceSub.textContent = n2 + ' peut voir la répartition des tâches';
+  // Update dashboard greeting
+  const greeting = document.querySelector('.top-greeting span');
+  if (greeting) greeting.textContent = n1 + ' ☀️';
+  // Update top-sub
+  const topSub = document.querySelector('#screen-dashboard .top-sub');
+  if (topSub) topSub.textContent = '7 tâches en cours · 2 urgentes';
+  // Update score pills
+  const pills = document.querySelectorAll('.score-pill .name');
+  if (pills[0]) pills[0].textContent = n1;
+  if (pills[1]) pills[1].textContent = n2;
+  // Update couple screen
+  const profilNames = document.querySelectorAll('.profil-name');
+  if (profilNames[0]) profilNames[0].textContent = n1;
+  if (profilNames[1]) profilNames[1].textContent = n2;
+  // Update modal avatars
+  const modalAvatarPart = document.getElementById('modal-name-part');
+  if (modalAvatarPart) modalAvatarPart.textContent = n2;
+  // Update magasin sharing text
+  const courseSub = document.querySelector('#screen-courses .top-sub');
+  if (courseSub) courseSub.textContent = 'Partagé avec ' + n2 + ' · Mis à jour à l\'instant';
 }
 document.addEventListener('DOMContentLoaded', function() {
   updateSaisirFab();
