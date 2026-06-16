@@ -1233,171 +1233,25 @@
 </style>
 
 <script>
-// Generate PWA icon
+// Generate PWA icon (compatible all browsers)
 (function() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 512; canvas.height = 512;
-  const ctx = canvas.getContext('2d');
-  // Background
-  ctx.fillStyle = '#2D2420';
-  ctx.roundRect(0, 0, 512, 512, 80);
-  ctx.fill();
-  // Brain emoji
-  ctx.font = '340px serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('🧠', 256, 380);
-  const dataUrl = canvas.toDataURL('image/png');
-  document.getElementById('pwa-icon').href = dataUrl;
-  // Also update manifest icons dynamically
-  window._pwaIcon = dataUrl;
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#2D2420';
+    ctx.fillRect(0, 0, 512, 512);
+    ctx.font = '300px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🧠', 256, 360);
+    const dataUrl = canvas.toDataURL('image/png');
+    const iconEl = document.getElementById('pwa-icon');
+    if (iconEl) iconEl.href = dataUrl;
+  } catch(e) {}
 })();
 </script>
 
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL = 'https://pbcwxzyzmantjufsasyz.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_KUTvoyHXL2f0AEePBTrmdg_wEMv6I2b';
-let supabase;
-try {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-} catch(e) { console.log('Supabase init error:', e); }
 
-// ── SYNC SUPABASE ──
-let coupleId = null;
-
-async function initSupabase() {
-  // Check if couple already exists in localStorage
-  coupleId = localStorage.getItem('mdm_couple_id');
-  if (coupleId) {
-    await loadFromSupabase();
-  }
-}
-
-async function createCouple(name1, name2, avatar1, avatar2) {
-  // Generate a unique couple code like MDM-XXXX
-  const code = 'MDM-' + Math.random().toString(36).substr(2,4).toUpperCase();
-  
-  const { data, error } = await supabase
-    .from('couples')
-    .insert({
-      code,
-      name1, name2, avatar1, avatar2,
-      data: JSON.stringify({
-        magasins: {},
-        saisir: [],
-        enfants: [],
-        catalog: [],
-        cartePhotos: {}
-      })
-    })
-    .select()
-    .single();
-    
-  if (error) { console.error('Create couple error:', error); return null; }
-  
-  coupleId = data.id;
-  localStorage.setItem('mdm_couple_id', coupleId);
-  localStorage.setItem('mdm_couple_code', code);
-  
-  // Update code display
-  const codeEl = document.querySelector('.code-value');
-  if (codeEl) codeEl.textContent = code;
-  
-  return data;
-}
-
-async function joinCouple(code) {
-  const { data, error } = await supabase
-    .from('couples')
-    .select('*')
-    .eq('code', code.toUpperCase())
-    .single();
-    
-  if (error || !data) {
-    showToast('❌ Code invalide — vérifie et réessaie');
-    return false;
-  }
-  
-  coupleId = data.id;
-  localStorage.setItem('mdm_couple_id', coupleId);
-  localStorage.setItem('mdm_couple_code', code);
-  localStorage.setItem('mdm_name1', data.name1);
-  localStorage.setItem('mdm_name2', data.name2);
-  localStorage.setItem('mdm_avatar1', data.avatar1);
-  localStorage.setItem('mdm_avatar2', data.avatar2);
-  
-  // Load shared data
-  const shared = JSON.parse(data.data || '{}');
-  if (shared.magasins) Object.assign(magasinsData, shared.magasins);
-  if (shared.saisir) saisirTasks.push(...shared.saisir);
-  if (shared.enfants) enfantsData.push(...shared.enfants);
-  if (shared.catalog) productCatalog.push(...shared.catalog);
-  
-  updateAllNames(data.name1, data.name2);
-  showToast('✅ Connecté au couple de ' + data.name1 + ' !');
-  goTo('dashboard');
-  return true;
-}
-
-async function saveToSupabase() {
-  if (!coupleId) return;
-  
-  const shared = {
-    magasins: magasinsData,
-    saisir: saisirTasks,
-    enfants: enfantsData,
-    catalog: productCatalog,
-    cartePhotos: cartePhotoData
-  };
-  
-  await supabase
-    .from('couples')
-    .update({ data: JSON.stringify(shared), updated_at: new Date().toISOString() })
-    .eq('id', coupleId);
-}
-
-async function loadFromSupabase() {
-  if (!coupleId || !supabase) return;
-  
-  const { data, error } = await supabase
-    .from('couples')
-    .select('*')
-    .eq('id', coupleId)
-    .single();
-    
-  if (error || !data) return;
-  
-  localStorage.setItem('mdm_name1', data.name1);
-  localStorage.setItem('mdm_name2', data.name2);
-  
-  const shared = JSON.parse(data.data || '{}');
-  if (shared.magasins) Object.assign(magasinsData, shared.magasins);
-  if (shared.saisir && saisirTasks.length === 0) saisirTasks.push(...shared.saisir);
-  if (shared.enfants && enfantsData.length === 0) enfantsData.push(...shared.enfants);
-  if (shared.catalog && productCatalog.length === 0) productCatalog.push(...shared.catalog);
-  
-  updateAllNames(data.name1, data.name2);
-}
-
-// Subscribe to real-time changes
-function subscribeToCouple() {
-  if (!coupleId) return;
-  supabase
-    .channel('couple-changes')
-    .on('postgres_changes', 
-      { event: 'UPDATE', schema: 'public', table: 'couples', filter: `id=eq.${coupleId}` },
-      (payload) => {
-        const shared = JSON.parse(payload.new.data || '{}');
-        if (shared.magasins) Object.assign(magasinsData, shared.magasins);
-        if (shared.saisir) { saisirTasks.length = 0; saisirTasks.push(...shared.saisir); }
-        updateSaisirFab();
-        showToast('🔄 Mis à jour par ton partenaire !');
-      }
-    )
-    .subscribe();
-}
-</script>
 
 </head>
 <body>
@@ -2838,10 +2692,8 @@ function saveAll() {
     localStorage.setItem('mdm_catalog', JSON.stringify(productCatalog));
     localStorage.setItem('mdm_saisir', JSON.stringify(saisirTasks));
     localStorage.setItem('mdm_enfants', JSON.stringify(enfantsData));
-    localStorage.setItem('mdm_cartePhotos', JSON.stringify(cartePhotoData));
   } catch(e) { console.log('Save error:', e); }
-  // Sync to Supabase
-  saveToSupabase();
+  if (typeof saveToSupabase === 'function') saveToSupabase();
 }
 
 function loadAll() {
@@ -2926,15 +2778,14 @@ function selectManage(el) {
 }
 
 async function goToDashboard() {
-  try {
-    const n1 = localStorage.getItem('mdm_name1');
-    const n2 = localStorage.getItem('mdm_name2');
-    const a1 = localStorage.getItem('mdm_avatar1') || '🧑';
-    const a2 = localStorage.getItem('mdm_avatar2') || '🧑';
-    await createCouple(n1, n2, a1, a2);
-    subscribeToCouple();
-  } catch(e) { console.log('Supabase error:', e); }
+  const n1 = localStorage.getItem('mdm_name1');
+  const n2 = localStorage.getItem('mdm_name2');
+  const a1 = localStorage.getItem('mdm_avatar1') || '🧑';
+  const a2 = localStorage.getItem('mdm_avatar2') || '🧑';
   goTo('dashboard');
+  if (typeof createCouple === 'function') {
+    try { await createCouple(n1, n2, a1, a2); } catch(e) {}
+  }
 }
 
 function openCategory(catId) {
@@ -3551,7 +3402,7 @@ function selectRepas(el) {
   showToast('🍽️ ' + name + ' ajouté au menu !');
 }
 
-let cartePhotoData = {};
+// cartePhotoData defined in supabase block
 
 function photoCartePhysique(source) {
   if (source === 'camera') {
@@ -3881,7 +3732,7 @@ async function initApp() {
       document.getElementById('manage-emoji-2').textContent = avatar2;
       // Update all partner name displays
       updateAllNames(n1, n2);
-      try { await initSupabase(); subscribeToCouple(); } catch(e) {}
+      if (typeof initSupabase === 'function') { try { await initSupabase(); } catch(e) {} }
       goTo('dashboard');
       return;
     }
@@ -3950,5 +3801,98 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 </script>
+
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+let _supabase = null;
+
+function getSupabase() {
+  if (!_supabase && window.supabase) {
+    _supabase = window.supabase.createClient('https://pbcwxzyzmantjufsasyz.supabase.co', 'sb_publishable_KUTvoyHXL2f0AEePBTrmdg_wEMv6I2b');
+  }
+  return _supabase;
+}
+
+let coupleId = null;
+// cartePhotoData defined in supabase block
+
+async function createCouple(n1, n2, a1, a2) {
+  const sb = getSupabase();
+  if (!sb) return null;
+  try {
+    const code = 'MDM-' + Math.random().toString(36).substr(2,4).toUpperCase();
+    const { data, error } = await sb.from('couples')
+      .insert({ code, name1:n1, name2:n2, avatar1:a1, avatar2:a2, data:'{}' })
+      .select().single();
+    if (error) { console.log('Create error:', error); return null; }
+    coupleId = data.id;
+    try { localStorage.setItem('mdm_couple_id', coupleId); localStorage.setItem('mdm_couple_code', code); } catch(e) {}
+    const codeEl = document.getElementById('couple-code');
+    if (codeEl) codeEl.textContent = code;
+    return data;
+  } catch(e) { console.log('createCouple error:', e); return null; }
+}
+
+async function saveToSupabase() {
+  const sb = getSupabase();
+  if (!sb || !coupleId) return;
+  try {
+    const shared = { magasins: magasinsData, saisir: saisirTasks, enfants: enfantsData, catalog: productCatalog };
+    await sb.from('couples').update({ data: JSON.stringify(shared) }).eq('id', coupleId);
+  } catch(e) { console.log('save error:', e); }
+}
+
+async function loadFromSupabase() {
+  const sb = getSupabase();
+  if (!sb || !coupleId) return;
+  try {
+    const { data } = await sb.from('couples').select('*').eq('id', coupleId).single();
+    if (!data) return;
+    try { localStorage.setItem('mdm_name1', data.name1); localStorage.setItem('mdm_name2', data.name2); } catch(e) {}
+    const shared = JSON.parse(data.data || '{}');
+    if (shared.magasins) Object.assign(magasinsData, shared.magasins);
+    if (shared.saisir && saisirTasks.length === 0) saisirTasks.push(...shared.saisir);
+    if (shared.enfants && enfantsData.length === 0) enfantsData.push(...shared.enfants);
+    if (shared.catalog && productCatalog.length === 0) productCatalog.push(...shared.catalog);
+    updateAllNames(data.name1, data.name2);
+  } catch(e) { console.log('load error:', e); }
+}
+
+async function joinCouple(code) {
+  const sb = getSupabase();
+  if (!sb) { showToast('❌ Connexion impossible'); return false; }
+  try {
+    const { data } = await sb.from('couples').select('*').eq('code', code.toUpperCase()).single();
+    if (!data) { showToast('❌ Code invalide'); return false; }
+    coupleId = data.id;
+    try { localStorage.setItem('mdm_couple_id', data.id); localStorage.setItem('mdm_couple_code', code); } catch(e) {}
+    const shared = JSON.parse(data.data || '{}');
+    if (shared.magasins) Object.assign(magasinsData, shared.magasins);
+    if (shared.saisir) saisirTasks.push(...shared.saisir);
+    if (shared.enfants) enfantsData.push(...shared.enfants);
+    if (shared.catalog) productCatalog.push(...shared.catalog);
+    updateAllNames(data.name1, data.name2);
+    showToast('✅ Connecté ! Bienvenue ' + data.name1);
+    goTo('dashboard');
+    return true;
+  } catch(e) { console.log('join error:', e); showToast('❌ Erreur de connexion'); return false; }
+}
+
+async function joinWithCode() {
+  const code = document.getElementById('join-code-input').value.trim();
+  if (!code) { showToast('⚠️ Entre le code !'); return; }
+  await joinCouple(code);
+}
+
+async function initSupabase() {
+  try {
+    coupleId = localStorage.getItem('mdm_couple_id');
+    if (coupleId) await loadFromSupabase();
+  } catch(e) { console.log('initSupabase error:', e); }
+}
+</script>
+
 </body>
 </html>
