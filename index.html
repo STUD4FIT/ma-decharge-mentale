@@ -2805,27 +2805,13 @@ function subscribeToCouple() {
 
 <script>
 const categories = {
-  courses: { icon: '🛒', name: 'Courses & Repas', tasks: [
-    { title: 'Acheter PQ + lessive', who: 'Moi', urgency: 'high', recur: 'Une fois' },
-    { title: 'Menu de la semaine', who: 'Moi', urgency: 'medium', recur: 'Chaque semaine' },
-    { title: 'Commander eau pétillante', who: getPartnerName(), urgency: 'low', recur: 'Une fois' },
-  ]},
-  factures: { icon: '💰', name: 'Factures & Admin', tasks: [
-    { title: 'Payer assurance voiture', who: 'Tous les deux', urgency: 'medium', recur: 'Une fois' },
-  ]},
-  enfants: { icon: '👶', name: 'Enfants', tasks: [
-    { title: 'Spectacle école Emma', who: getPartnerName(), urgency: 'high', recur: 'Une fois' },
-    { title: 'RDV pédiatre Lucas', who: 'Moi', urgency: 'medium', recur: 'Une fois' },
-  ]},
-  maison: { icon: '🏠', name: 'Maison', tasks: [
-    { title: 'Poubelle noire', who: getPartnerName(), urgency: 'low', recur: 'Chaque semaine' },
-    { title: 'Poubelle jaune', who: getPartnerName(), urgency: 'low', recur: '1 sem / 2' },
-  ]},
+  courses: { icon: '🛒', name: 'Courses & Repas', tasks: [] },
+  factures: { icon: '💰', name: 'Factures & Admin', tasks: [] },
+  enfants: { icon: '👶', name: 'Enfants', tasks: [] },
+  maison: { icon: '🏠', name: 'Maison', tasks: [] },
   voiture: { icon: '🚗', name: 'Voiture', tasks: [] },
   social: { icon: '❤️', name: 'Famille & Social', tasks: [] },
-  divers: { icon: '🔧', name: 'Divers', tasks: [
-    { title: 'Contacter voisin pour le mur', who: getPartnerName(), urgency: 'medium', recur: 'Une fois' },
-  ]},
+  divers: { icon: '🔧', name: 'Divers', tasks: [] },
 };
 
 let currentCat = null;
@@ -2962,7 +2948,7 @@ function openCategory(catId) {
   if (cat.tasks.length === 0) {
     body.innerHTML = `<div class="empty-state"><div class="big">✨</div><p>Aucune tâche ici pour l'instant.<br>Profitez-en !</p></div>`;
   } else {
-    const whoClass = { 'Moi': 'moi', getPartnerName(): 'lui', 'Tous les deux': 'deux' };
+    const pName = getPartnerName(); const whoClass = { 'Moi': 'moi', [pName]: 'lui', 'Tous les deux': 'deux' };
     const urgDot = { high: 'high', medium: 'medium', low: 'low' };
     body.innerHTML = `<div class="section-title" style="margin-top:16px">${cat.tasks.length} tâche${cat.tasks.length > 1 ? 's' : ''}</div><div class="urgent-list">` +
       cat.tasks.map((t, i) => `
@@ -3042,7 +3028,7 @@ function updateSummary() {
   const desc = document.getElementById('task-desc').value || '—';
   const urgLabels = { high: '🔴 Urgent', medium: '🟡 Normal', low: '🟢 Pas pressé' };
   const recurLabels = { once: 'Une fois', weekly: 'Chaque semaine', biweekly: '1 sem / 2', monthly: 'Chaque mois' };
-  const whoLabels = { moi: 'Moi', partenaire: getPartnerName(), deux: 'Tous les deux' };
+  const whoLabels = { moi: 'Moi', partenaire: getPartnerName(), deux: 'Tous les deux', lui: getPartnerName() };
   document.getElementById('sum-desc').textContent = desc;
   document.getElementById('sum-cat').textContent = modalData.catIcon + ' ' + (modalData.catName || '—');
   document.getElementById('sum-who').textContent = whoLabels[modalData.who] || '—';
