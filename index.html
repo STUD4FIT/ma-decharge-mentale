@@ -3262,11 +3262,6 @@ function clearDoneItems() {
   renderMagasinItems();
   saveAll();
   showToast('🗑️ Liste des achats vidée !');
-}tem.done ? 'text-decoration:line-through;color:var(--muted)' : ''}">${item.name}</div>
-        <div class="course-meta">${mag.emoji} ${mag.name}</div>
-      </div>
-    </div>
-  `).join('');
 }
 
 function toggleMagasinItem(i) {
