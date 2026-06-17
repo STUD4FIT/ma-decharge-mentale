@@ -2209,9 +2209,12 @@
     </div>
 
     <div class="section-title">Zone danger ⚠️</div>
-    <button onclick="resetApp()" style="width:100%;padding:14px;background:#FFF0EB;color:var(--rose);border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">
-      🗑️ Réinitialiser l'appli
-    </button>
+    <div style="background:#FFF0EB;border-radius:16px;padding:16px;margin-bottom:8px">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Effacer toutes les données et recommencer depuis zéro</div>
+      <button onclick="resetApp()" style="width:100%;padding:14px;background:var(--rose);color:white;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">
+        🗑️ Réinitialiser l'appli
+      </button>
+    </div>
 
   </div>
 
@@ -2705,7 +2708,7 @@ function saveAll() {
     localStorage.setItem('mdm_saisir', JSON.stringify(saisirTasks));
     localStorage.setItem('mdm_enfants', JSON.stringify(enfantsData));
   } catch(e) { console.log('Save error:', e); }
-  if (typeof saveToSupabase === 'function') saveToSupabase();
+
 }
 
 function loadAll() {
@@ -2789,7 +2792,7 @@ function selectManage(el) {
   el.classList.add('selected');
 }
 
-async function goToDashboard() {
+function goToDashboard() {
   const n1 = localStorage.getItem('mdm_name1');
   const n2 = localStorage.getItem('mdm_name2');
   const a1 = localStorage.getItem('mdm_avatar1') || '🧑';
@@ -2797,9 +2800,7 @@ async function goToDashboard() {
   try { localStorage.setItem('mdm_onboarded', 'true'); } catch(e) {}
   updateAllNames(n1, n2);
   goTo('dashboard');
-  if (typeof createCouple === 'function') {
-    try { await createCouple(n1, n2, a1, a2); } catch(e) {}
-  }
+
 }
 
 function openCategory(catId) {
@@ -3723,7 +3724,7 @@ function showPhotoZoom(src) {
 // goTo unified above
 
 // Init — restore from localStorage
-async function initApp() {
+function initApp() {
   loadAll();
   try {
     const n1 = localStorage.getItem('mdm_name1');
@@ -3741,7 +3742,7 @@ async function initApp() {
       document.getElementById('manage-emoji-2').textContent = avatar2;
       // Update all partner name displays
       updateAllNames(n1, n2);
-      if (typeof initSupabase === 'function') { try { await initSupabase(); } catch(e) {} }
+    
       goTo('dashboard');
       return;
     }
@@ -3812,8 +3813,7 @@ function showToast(msg) {
 </script>
 
 
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 let _supabase = null;
 
